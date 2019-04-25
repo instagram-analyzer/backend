@@ -12,7 +12,7 @@ const configureMiddleware = server => {
   server.use(morgan("dev"));
   server.use(cors());
   server.use("/api/users", users);
-  server.use("/api/instagram", instagram);
+  // server.use("/api/instagram", instagram);
 };
 
 module.exports = {

@@ -7,6 +7,8 @@ const findBy = (tbl, filter) =>
     .where(filter)
     .first();
 
+const findAllBy = (tbl, filter) => db(tbl).where(filter);
+
 const add = (tbl, item) => db(tbl).insert(item);
 const update = (tbl, id, item) =>
   db(tbl)
@@ -31,5 +33,6 @@ module.exports = {
   findBy,
   update,
   updateAccount,
-  getAccount
+  getAccount,
+  findAllBy
 };
