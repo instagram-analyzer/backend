@@ -4,10 +4,10 @@ exports.up = function(knex, Promise) {
       .integer("account_id")
       .references("id")
       .inTable("accounts");
-    tbl.integer("total_likes");
-    tbl.integer("total_comments");
-    tbl.float("average_likes");
-    tbl.float("average_comments");
+    tbl.string("total_likes");
+    tbl.string("total_comments");
+    tbl.string("average_likes");
+    tbl.string("average_comments");
   });
 };
 

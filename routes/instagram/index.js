@@ -84,15 +84,13 @@ route.post("/", async (req, res) => {
         .returning("id");
 
       if (data.details) {
-        const [addAccountDetails] = await models
-          .add("account_details", {
-            account_id: addAccount,
-            total_likes: data.details.total_likes,
-            total_comments: data.details.total_comments,
-            average_likes: data.details.average_likes,
-            average_comments: data.details.average_comments
-          })
-          .returning("id");
+        const [addAccountDetails] = await models.add("account_details", {
+          account_id: addAccount,
+          total_likes: data.details.total_likes,
+          total_comments: data.details.total_comments,
+          average_likes: data.details.average_likes,
+          average_comments: data.details.average_comments
+        });
         if (addAccount) {
           const account = await models.findBy("accounts", { id: addAccount });
           const accountDetails = await models.findBy("account_details", {
