@@ -10,6 +10,7 @@ exports.up = function(knex, Promise) {
     tbl.string("taken_at_timestamp");
     tbl.boolean("is_video");
     tbl.string("accessibility_caption");
+    tbl.float("engagment");
     tbl
       .integer("account_id")
       .unsigned()

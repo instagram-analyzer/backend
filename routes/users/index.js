@@ -27,6 +27,34 @@ route.get("/profile/:username", (req, res) => {
       }
     })
     .then(async result => {
+      const posts = result.data.graphql.user.edge_owner_to_timeline_media.edges;
+      const postsLength = posts.length;
+
+      let totalLikes = await posts
+        .map(p => {
+          return p.node.edge_liked_by.count;
+        })
+        .reduce((a, b) => a + b);
+
+      let totalComments = await posts
+        .map(p => {
+          return p.node.edge_media_to_comment.count;
+        })
+        .reduce((a, b) => a + b);
+
+      let totalViews = await posts
+        .filter(p => p.node.is_video)
+        .map(p => {
+          return p.node.video_view_count;
+        })
+        .reduce((a, b) => a + b);
+
+      let videoCount = await posts.filter(p => p.node.is_video).length;
+
+      const aveLikes = totalLikes / postsLength;
+      const aveComments = totalComments / postsLength;
+      const aveViews = totalViews / videoCount;
+
       const [addAccount] = await models
         .add("accounts", {
           account_bio: result.data.graphql.user.biography,
@@ -35,7 +63,7 @@ route.get("/profile/:username", (req, res) => {
           account_image_url: result.data.graphql.user.profile_pic_url_hd,
           follower_count: result.data.graphql.user.edge_followed_by.count,
           following_count: result.data.graphql.user.edge_follow.count,
-          hightlight_reel_count: result.data.graphql.user.hightlight_reel_count,
+          hightlight_reel_count: result.data.graphql.user.highlight_reel_count,
           full_name: result.data.graphql.user.full_name,
           is_verified: result.data.graphql.user.is_verified,
           is_business_account: result.data.graphql.user.is_business_account,
@@ -43,10 +71,15 @@ route.get("/profile/:username", (req, res) => {
             result.data.graphql.user.business_category_name,
           is_private: result.data.graphql.user.is_private,
           is_joined_recently: result.data.graphql.user.is_joined_recently,
+          average_likes: Math.round(aveLikes * 100) / 100,
+          average_comments: Math.round(aveComments * 100) / 100,
+          average_views: Math.round(aveViews * 100) / 100,
           posts_count:
             result.data.graphql.user.edge_owner_to_timeline_media.count
         })
         .returning("id");
+
+      const newAccount = await models.findBy("accounts", { id: addAccount });
 
       await result.data.graphql.user.edge_owner_to_timeline_media.edges.map(
         async post => {
@@ -62,7 +95,15 @@ route.get("/profile/:username", (req, res) => {
             taken_at_timestamp: post.node.taken_at_timestamp,
             is_video: post.node.is_video,
             accessibility_caption: post.node.accessibility_caption,
-            account_id: addAccount
+            account_id: addAccount,
+            engagment:
+              Math.round(
+                ((post.node.edge_liked_by.count +
+                  post.node.edge_media_to_comment.count) /
+                  newAccount.follower_count) *
+                  100 *
+                  100
+              ) / 100
           });
         }
       );
@@ -71,22 +112,9 @@ route.get("/profile/:username", (req, res) => {
         account_id: addAccount
       });
 
-      res.json({
-        account_bio: result.data.graphql.user.biography,
-        account_bio_url: result.data.graphql.user.external_url,
-        account_username: result.data.graphql.user.username,
-        account_image_url: result.data.graphql.user.profile_pic_url_hd,
-        follower_count: result.data.graphql.user.edge_followed_by.count,
-        following_count: result.data.graphql.user.edge_follow.count,
-        hightlight_reel_count: result.data.graphql.user.hightlight_reel_count,
-        full_name: result.data.graphql.user.full_name,
-        is_verified: result.data.graphql.user.is_verified,
-        is_business_account: result.data.graphql.user.is_business_account,
-        business_category_name: result.data.graphql.user.business_category_name,
-        is_private: result.data.graphql.user.is_private,
-        is_joined_recently: result.data.graphql.user.is_joined_recently,
-        posts: account_posts
-      });
+      newAccount.posts = account_posts;
+
+      res.json(newAccount);
     })
     .catch(() => {
       res.json({ message: "Broken" });

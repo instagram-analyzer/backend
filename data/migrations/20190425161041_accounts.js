@@ -15,6 +15,9 @@ exports.up = function(knex, Promise) {
     tbl.boolean("is_verified");
     tbl.boolean("is_joined_recently");
     tbl.string("posts_count");
+    tbl.float("average_likes");
+    tbl.float("average_comments");
+    tbl.float("average_views");
     tbl.timestamps(true, true);
   });
 };
