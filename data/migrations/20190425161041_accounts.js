@@ -18,6 +18,8 @@ exports.up = function(knex, Promise) {
     tbl.float("average_likes");
     tbl.float("average_comments");
     tbl.float("average_views");
+    tbl.float("total_engagement");
+    tbl.string("instagram_id");
     tbl.timestamps(true, true);
   });
 };

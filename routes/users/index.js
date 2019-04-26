@@ -5,20 +5,20 @@ const { cookie } = require("./cookie");
 
 axios.defaults.withCredentials = true;
 
+let cookieNames = [];
+//"cookie1=value; cookie2=value; cookie3=value;"
+const cookies = cookie.map(cookie => {
+  cookieNames.push({ name: cookie.name, value: cookie.value });
+});
+
+let cookieString = "";
+
+cookieNames.map(cookie => {
+  cookieString += `${cookie.name}=${cookie.value}; `;
+});
+
 route.get("/profile/:username", (req, res) => {
   const { username } = req.params;
-
-  let cookieNames = [];
-  //"cookie1=value; cookie2=value; cookie3=value;"
-  const cookies = cookie.map(cookie => {
-    cookieNames.push({ name: cookie.name, value: cookie.value });
-  });
-
-  let cookieString = "";
-
-  cookieNames.map(cookie => {
-    cookieString += `${cookie.name}=${cookie.value}; `;
-  });
 
   axios
     .get(`https://www.instagram.com/${username}/?__a=1`, {
@@ -32,6 +32,7 @@ route.get("/profile/:username", (req, res) => {
       let aveLikes;
       let aveComments;
       let aveViews;
+      let totalEngagment;
 
       if (postsLength) {
         let totalLikes = await posts
@@ -55,6 +56,12 @@ route.get("/profile/:username", (req, res) => {
 
         let videoCount = await posts.filter(p => p.node.is_video).length;
 
+        totalEngagment =
+          Math.round(
+            ((totalLikes + totalComments) /
+              result.data.graphql.user.edge_followed_by.count) *
+              100
+          ) / 100;
         aveLikes = totalLikes / postsLength;
         aveComments = totalComments / postsLength;
         aveViews = totalViews / videoCount;
@@ -62,6 +69,7 @@ route.get("/profile/:username", (req, res) => {
 
       const [addAccount] = await models
         .add("accounts", {
+          instagram_id: result.data.graphql.user.id,
           account_bio: result.data.graphql.user.biography,
           account_bio_url: result.data.graphql.user.external_url,
           account_username: result.data.graphql.user.username,
@@ -81,6 +89,7 @@ route.get("/profile/:username", (req, res) => {
             ? Math.round(aveComments * 100) / 100
             : 0,
           average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
+          total_engagement: postsLength ? totalEngagment : 0,
           posts_count:
             result.data.graphql.user.edge_owner_to_timeline_media.count
         })
@@ -129,18 +138,6 @@ route.get("/profile/:username", (req, res) => {
 route.get("/post/:post", (req, res) => {
   const { post } = req.params;
 
-  let cookieNames = [];
-  //"cookie1=value; cookie2=value; cookie3=value;"
-  const cookies = cookie.map(cookie => {
-    cookieNames.push({ name: cookie.name, value: cookie.value });
-  });
-
-  let cookieString = "";
-
-  cookieNames.map(cookie => {
-    cookieString += `${cookie.name}=${cookie.value}; `;
-  });
-
   axios
     .get(`https://www.instagram.com/p/${post}/?__a=1`, {
       headers: {
@@ -151,6 +148,52 @@ route.get("/post/:post", (req, res) => {
     .catch(() => {
       res.json({ message: "Broken" });
     });
+});
+
+route.get("/followers/:instagram_id", async (req, res) => {
+  const { instagram_id } = req.params;
+  const user = await models.findBy("accounts", { instagram_id });
+  console.log(user);
+  let end_cursor;
+
+  async function getFollowers() {
+    const queryInstagram = await axios.get(
+      end_cursor
+        ? `https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
+        : `https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50}`,
+      {
+        headers: {
+          Cookie: cookieString
+        }
+      }
+    );
+    await queryInstagram.data.data.user.edge_followed_by.edges.map(async f => {
+      const follower = await models.add("followers", {
+        instagram_id: f.node.id,
+        username: f.node.username,
+        full_name: f.node.full_name,
+        profile_pic_url: f.node.profile_pic_url,
+        is_private: f.node.is_private,
+        is_verified: f.node.is_verified,
+        account_id: user.id
+      });
+    });
+
+    if (
+      queryInstagram.data.data.user.edge_followed_by.page_info.has_next_page
+    ) {
+      end_cursor =
+        queryInstagram.data.data.user.edge_followed_by.page_info.end_cursor;
+      getFollowers();
+    } else {
+      const followersList = await models.findAllBy("followers", {
+        account_id: user.id
+      });
+      res.json(followersList);
+    }
+  }
+
+  getFollowers();
 });
 
 module.exports = route;
