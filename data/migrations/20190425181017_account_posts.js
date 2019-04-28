@@ -5,7 +5,7 @@ exports.up = function(knex, Promise) {
     tbl.boolean("is_video");
     tbl.string("video_url");
     tbl.integer("video_view_count");
-    tbl.string("caption");
+    tbl.text("caption");
     tbl.string("shortcode");
     tbl.string("taken_at_timestamp");
     tbl.integer("comments_count");

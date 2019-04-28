@@ -2,8 +2,7 @@ const route = require("express").Router();
 const axios = require("axios");
 const models = require("../../common/helpers.js");
 const { cookieSet } = require("./cookie");
-const BASE_URL =
-  "https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables=";
+const BASE_URL = "https://www.instagram.com/graphql/query/?";
 
 // const getFollowers = require("./getFollowers");
 
@@ -153,19 +152,199 @@ route.get("/profile/:username", (req, res) => {
     });
 });
 
-route.get("/post/:post", (req, res) => {
-  const { post } = req.params;
+route.get("/post/:instagram_id", async (req, res) => {
+  const { instagram_id } = req.params;
+  const user = await models.findBy("accounts", { instagram_id });
+  let end_cursor;
+  let next_page = true;
 
-  axios
-    .get(`https://www.instagram.com/p/${post}/?__a=1`, {
-      headers: {
-        Cookie: cookieString
-      }
-    })
-    .then(result => res.json({ post: result.data }))
-    .catch(() => {
-      res.json({ message: "Broken" });
-    });
+  const getPosts = async () => {
+    await getCookie();
+
+    if (next_page) {
+      console.log(
+        "********** GETTING POSTS AND SETTING THE NEXT PAGE *********"
+      );
+      axios
+        .get(
+          end_cursor
+            ? `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":12,"after":"${end_cursor}"}`
+            : `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":50}`,
+          {
+            headers: {
+              Cookie: cookieString
+            }
+          }
+        )
+        .then(async result => {
+          if (result.data.status === "fail") {
+            console.log(
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+            );
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
+              getPosts();
+            } else {
+              currentCookie += 1;
+              getPosts();
+            }
+          } else {
+            next_page =
+              result.data.data.user.edge_owner_to_timeline_media.page_info
+                .has_next_page;
+
+            end_cursor =
+              result.data.data.user.edge_owner_to_timeline_media.page_info
+                .end_cursor;
+
+            await result.data.data.user.edge_owner_to_timeline_media.edges.map(
+              async p => {
+                await models.add("account_posts", {
+                  display_url: p.node.display_url,
+                  is_video: p.node.is_video,
+                  video_url: p.node.is_video ? p.node.video_url : null,
+                  video_view_count: p.node.is_video
+                    ? p.node.video_view_count
+                    : null,
+                  caption: p.node.edge_media_to_caption.edges.length
+                    ? p.node.edge_media_to_caption.edges[0].node.text
+                    : null,
+                  shortcode: p.node.shortcode,
+                  taken_at_timestamp: p.node.taken_at_timestamp,
+                  comments_count: p.node.edge_media_to_comment.count,
+                  likes_count: p.node.edge_media_preview_like.count,
+                  view_count: p.node.is_video ? p.node.video_view_count : null,
+                  comments_disabled: p.node.comments_disabled,
+                  accessibility_caption: p.node.accessibility_caption,
+                  engagment: Math.floor(
+                    ((p.node.edge_media_preview_like.count +
+                      (p.node.edge_media_to_comment.count /
+                        user.follower_count) *
+                        100) /
+                      100) *
+                      100
+                  ),
+                  account_id: Number(user.id)
+                });
+              }
+            );
+          }
+        })
+        .then(() => getPosts())
+        .catch(error => {
+          if (error.response.status === 429) {
+            console.log(
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+            );
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
+              getPosts();
+            } else {
+              currentCookie += 1;
+              getPosts();
+            }
+          }
+        });
+    } else {
+      console.log("********** THIS IS THE LAST PAGE OF POSTS *********");
+      axios
+        .get(
+          end_cursor
+            ? `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":12,"after":"${end_cursor}"}`
+            : `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":50}`,
+          {
+            headers: {
+              Cookie: cookieString
+            }
+          }
+        )
+        .then(async result => {
+          if (result.data.status === "fail") {
+            console.log(
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+            );
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
+              getPosts();
+            } else {
+              currentCookie += 1;
+              getPosts();
+            }
+          } else {
+            next_page =
+              result.data.data.user.edge_owner_to_timeline_media.page_info
+                .has_next_page;
+
+            end_cursor =
+              result.data.data.user.edge_owner_to_timeline_media.page_info
+                .end_cursor;
+
+            await result.data.data.user.edge_owner_to_timeline_media.edges.map(
+              async p => {
+                await models.add("account_posts", {
+                  display_url: p.node.display_url,
+                  is_video: p.node.is_video,
+                  video_url: p.node.is_video ? p.node.video_url : null,
+                  video_view_count: p.node.is_video
+                    ? p.node.video_view_count
+                    : null,
+                  caption: p.node.edge_media_to_caption.edges.length
+                    ? p.node.edge_media_to_caption.edges[0].node.text
+                    : null,
+                  shortcode: p.node.shortcode,
+                  taken_at_timestamp: p.node.taken_at_timestamp,
+                  comments_count: p.node.edge_media_to_comment.count,
+                  likes_count: p.node.edge_media_preview_like.count,
+                  view_count: p.node.is_video ? p.node.video_view_count : null,
+                  comments_disabled: p.node.comments_disabled,
+                  accessibility_caption: p.node.accessibility_caption,
+                  engagment: Math.floor(
+                    ((p.node.edge_media_preview_like.count +
+                      (p.node.edge_media_to_comment.count /
+                        user.follower_count) *
+                        100) /
+                      100) *
+                      100
+                  ),
+                  account_id: Number(user.id)
+                });
+              }
+            );
+          }
+        })
+        .then(() => {
+          console.log("********** DONE GETTING ALL POSTS **********");
+          return;
+        })
+        .catch(error => {
+          if (error.response.status === 429) {
+            console.log(
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+            );
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
+              getPosts();
+            } else {
+              currentCookie += 1;
+              getPosts();
+            }
+          }
+        });
+    }
+  };
+
+  try {
+    console.log(
+      `************************** STARTING SCRAPE JOB FOR ${
+        user.account_username
+      } ***********************************`
+    );
+    getPosts();
+
+    res.json({ message: "Scraping has started bro" });
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
 });
 
 route.get("/followers/:instagram_id", async (req, res, next) => {
@@ -183,8 +362,8 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
       axios
         .get(
           end_cursor
-            ? `${BASE_URL}{"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
-            : `${BASE_URL}{"id":"${instagram_id}","first":50}`,
+            ? `${BASE_URL}query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
+            : `${BASE_URL}query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50}`,
           {
             headers: {
               Cookie: cookieString
@@ -251,8 +430,8 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
       axios
         .get(
           end_cursor
-            ? `${BASE_URL}{"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
-            : `${BASE_URL}{"id":"${instagram_id}","first":50}`,
+            ? `${BASE_URL}query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
+            : `${BASE_URL}query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50}`,
           {
             headers: {
               Cookie: cookieString
