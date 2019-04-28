@@ -4,7 +4,9 @@ const cron = require("node-cron");
 const models = require("../../common/helpers.js");
 const { cookieSet } = require("./cookie");
 const BASE_URL = "https://www.instagram.com/graphql/query/?";
+
 // const getFollowers = require("./getFollowers");
+
 let cookieString = "";
 let currentCookie = 0;
 
@@ -140,7 +142,7 @@ function fetchUser(username) {
 
 const startCronJob = username => {
   cron.schedule("0-59/1 * * * * *", () => {
-    console.log("Fetching posts");
+    console.log("Fetching user account");
     fetchUser(username);
   });
 };
