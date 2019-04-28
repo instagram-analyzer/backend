@@ -1,25 +1,39 @@
 const route = require("express").Router();
 const axios = require("axios");
 const models = require("../../common/helpers.js");
-const { cookie } = require("./cookie");
+const { cookieSet } = require("./cookie");
+const BASE_URL =
+  "https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables=";
+
 // const getFollowers = require("./getFollowers");
 
 axios.defaults.withCredentials = true;
 
-const BASE_URL =
-  "https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables=";
-
-let cookieNames = [];
-//"cookie1=value; cookie2=value; cookie3=value;"
-const cookies = cookie.map(cookie => {
-  cookieNames.push({ name: cookie.name, value: cookie.value });
-});
-
+// const proxy = {
+//   host: "190.202.24.66",
+//   port: 3128
+//   // auth: {
+//   //   username: 'some_login',
+//   //   password: 'some_pass'
+//   // }
+// };
 let cookieString = "";
+let currentCookie = 0;
 
-cookieNames.map(cookie => {
-  cookieString += `${cookie.name}=${cookie.value}; `;
-});
+const getCookie = () => {
+  cookieString = "";
+  let cookieNames = [];
+  //"cookie1=value; cookie2=value; cookie3=value;"
+  const cookies = cookieSet[currentCookie].map(cookie => {
+    cookieNames.push({ name: cookie.name, value: cookie.value });
+  });
+
+  cookieNames.map(cookie => {
+    cookieString += `${cookie.name}=${cookie.value}; `;
+  });
+};
+
+getCookie();
 
 route.get("/profile/:username", (req, res) => {
   const { username } = req.params;
@@ -161,6 +175,7 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
   let next_page = true;
 
   const getFollowers = async () => {
+    await getCookie();
     if (next_page) {
       console.log(
         "********** GETTING FOLLOWERS AND SETTING THE NEXT PAGE *********"
@@ -181,10 +196,17 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
             console.log(
               "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
             );
-            setTimeout(() => {
-              console.log("********** FINISHING WHAT WE STARTED *********");
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
               getFollowers();
-            }, 1000 * 60 * 5);
+            } else {
+              currentCookie += 1;
+              getFollowers();
+            }
+            // setTimeout(() => {
+            //   console.log("********** FINISHING WHAT WE STARTED *********");
+            //   getFollowers();
+            // }, 1000 * 60 * 5);
           } else {
             next_page =
               result.data.data.user.edge_followed_by.page_info.has_next_page;
@@ -211,10 +233,17 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
             console.log(
               "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
             );
-            setTimeout(() => {
-              console.log("********** FINISHING WHAT WE STARTED *********");
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
               getFollowers();
-            }, 1000 * 60 * 5);
+            } else {
+              currentCookie += 1;
+              getFollowers();
+            }
+            // setTimeout(() => {
+            //   console.log("********** FINISHING WHAT WE STARTED *********");
+            //   getFollowers();
+            // }, 1000 * 60 * 5);
           }
         });
     } else {
@@ -235,10 +264,18 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
             console.log(
               "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
             );
-            setTimeout(() => {
-              console.log("********** FINISHING WHAT WE STARTED *********");
+
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
               getFollowers();
-            }, 1000 * 60 * 5);
+            } else {
+              currentCookie += 1;
+              getFollowers();
+            }
+            // setTimeout(() => {
+            //   console.log("********** FINISHING WHAT WE STARTED *********");
+            //   getFollowers();
+            // }, 1000 * 60 * 5);
           } else {
             console.log(
               "********** THIS IS THE LAST OF THE FOLLOWERS *********"
@@ -275,10 +312,17 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
             console.log(
               "*********** WAITING 5 MINS BECAUSE OF INSTAGRAM RATE LIMITING ********"
             );
-            setTimeout(() => {
-              console.log("*********** LETS TRY AGAIN ***********");
+            if (currentCookie === cookieSet.length - 1) {
+              currentCookie = 0;
               getFollowers();
-            }, 1000 * 60 * 5);
+            } else {
+              currentCookie += 1;
+              getFollowers();
+            }
+            // setTimeout(() => {
+            //   console.log("*********** LETS TRY AGAIN ***********");
+            //   getFollowers();
+            // }, 1000 * 60 * 5);
           }
         });
     }
