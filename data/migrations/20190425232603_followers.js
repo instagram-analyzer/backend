@@ -1,5 +1,6 @@
 exports.up = function(knex, Promise) {
   return knex.schema.createTable("followers", tbl => {
+    tbl.unique(["username", "account_id"]);
     tbl.increments();
     tbl.string("instagram_id");
     tbl.string("username");

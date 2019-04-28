@@ -2,8 +2,12 @@ const route = require("express").Router();
 const axios = require("axios");
 const models = require("../../common/helpers.js");
 const { cookie } = require("./cookie");
+// const getFollowers = require("./getFollowers");
 
 axios.defaults.withCredentials = true;
+
+const BASE_URL =
+  "https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables=";
 
 let cookieNames = [];
 //"cookie1=value; cookie2=value; cookie3=value;"
@@ -47,14 +51,14 @@ route.get("/profile/:username", (req, res) => {
           })
           .reduce((a, b) => a + b);
 
-        let totalViews = await posts
-          .filter(p => p.node.is_video)
-          .map(p => {
-            return p.node.video_view_count;
-          })
-          .reduce((a, b) => a + b);
+        // let totalViews = await posts
+        //   .filter(p => p.node.is_video)
+        //   .map(p => {
+        //     return p.node.video_view_count;
+        //   })
+        //   .reduce((a, b) => a + b);
 
-        let videoCount = await posts.filter(p => p.node.is_video).length;
+        // let videoCount = await posts.filter(p => p.node.is_video).length;
 
         totalEngagment =
           Math.round(
@@ -64,7 +68,7 @@ route.get("/profile/:username", (req, res) => {
           ) / 100;
         aveLikes = totalLikes / postsLength;
         aveComments = totalComments / postsLength;
-        aveViews = totalViews / videoCount;
+        // aveViews = totalViews / videoCount;
       }
 
       const [addAccount] = await models
@@ -88,7 +92,7 @@ route.get("/profile/:username", (req, res) => {
           average_comments: postsLength
             ? Math.round(aveComments * 100) / 100
             : 0,
-          average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
+          // average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
           total_engagement: postsLength ? totalEngagment : 0,
           posts_count:
             result.data.graphql.user.edge_owner_to_timeline_media.count
@@ -150,50 +154,207 @@ route.get("/post/:post", (req, res) => {
     });
 });
 
-route.get("/followers/:instagram_id", async (req, res) => {
+route.get("/followers/:instagram_id", async (req, res, next) => {
   const { instagram_id } = req.params;
   const user = await models.findBy("accounts", { instagram_id });
-  console.log(user);
   let end_cursor;
+  let next_page = true;
 
-  async function getFollowers() {
-    const queryInstagram = await axios.get(
-      end_cursor
-        ? `https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
-        : `https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50}`,
-      {
-        headers: {
-          Cookie: cookieString
-        }
-      }
-    );
-    await queryInstagram.data.data.user.edge_followed_by.edges.map(async f => {
-      const follower = await models.add("followers", {
-        instagram_id: f.node.id,
-        username: f.node.username,
-        full_name: f.node.full_name,
-        profile_pic_url: f.node.profile_pic_url,
-        is_private: f.node.is_private,
-        is_verified: f.node.is_verified,
-        account_id: user.id
-      });
-    });
+  const getFollowers = async () => {
+    if (next_page) {
+      console.log(
+        "********** GETTING FOLLOWERS AND SETTING THE NEXT PAGE *********"
+      );
+      axios
+        .get(
+          end_cursor
+            ? `${BASE_URL}{"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
+            : `${BASE_URL}{"id":"${instagram_id}","first":50}`,
+          {
+            headers: {
+              Cookie: cookieString
+            }
+          }
+        )
+        .then(async result => {
+          if (result.data.status === "fail") {
+            console.log(
+              "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
+            );
+            setTimeout(() => {
+              console.log("********** FINISHING WHAT WE STARTED *********");
+              getFollowers();
+            }, 1000 * 60 * 5);
+          } else {
+            next_page =
+              result.data.data.user.edge_followed_by.page_info.has_next_page;
 
-    if (
-      queryInstagram.data.data.user.edge_followed_by.page_info.has_next_page
-    ) {
-      end_cursor =
-        queryInstagram.data.data.user.edge_followed_by.page_info.end_cursor;
-      getFollowers();
+            end_cursor =
+              result.data.data.user.edge_followed_by.page_info.end_cursor;
+
+            await result.data.data.user.edge_followed_by.edges.map(async f => {
+              await models.add("followers", {
+                instagram_id: f.node.id,
+                username: f.node.username,
+                full_name: f.node.full_name,
+                profile_pic_url: f.node.profile_pic_url,
+                is_private: f.node.is_private,
+                is_verified: f.node.is_verified,
+                account_id: Number(user.id)
+              });
+            });
+          }
+        })
+        .then(() => getFollowers())
+        .catch(error => {
+          if (error.response.status === 429) {
+            console.log(
+              "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
+            );
+            setTimeout(() => {
+              console.log("********** FINISHING WHAT WE STARTED *********");
+              getFollowers();
+            }, 1000 * 60 * 5);
+          }
+        });
     } else {
-      const followersList = await models.findAllBy("followers", {
-        account_id: user.id
-      });
-      res.json(followersList);
+      console.log("********** THIS IS THE LAST PAGE OF FOLLOWERS *********");
+      axios
+        .get(
+          end_cursor
+            ? `${BASE_URL}{"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
+            : `${BASE_URL}{"id":"${instagram_id}","first":50}`,
+          {
+            headers: {
+              Cookie: cookieString
+            }
+          }
+        )
+        .then(async result => {
+          if (result.data.status === "fail") {
+            console.log(
+              "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
+            );
+            setTimeout(() => {
+              console.log("********** FINISHING WHAT WE STARTED *********");
+              getFollowers();
+            }, 1000 * 60 * 5);
+          } else {
+            console.log(
+              "********** THIS IS THE LAST OF THE FOLLOWERS *********"
+            );
+            if (
+              !result.data.data.user.edge_followed_by.page_info.has_next_page
+            ) {
+              next_page = false;
+              end_cursor = null;
+              await result.data.data.user.edge_followed_by.edges.map(
+                async f => {
+                  await models.add("followers", {
+                    instagram_id: f.node.id,
+                    username: f.node.username,
+                    full_name: f.node.full_name,
+                    profile_pic_url: f.node.profile_pic_url,
+                    is_private: f.node.is_private,
+                    is_verified: f.node.is_verified,
+                    account_id: Number(user.id)
+                  });
+                }
+              );
+            }
+
+            return;
+          }
+        })
+        .then(() => {
+          console.log("********** DONE GETTING ALL FOLLOWERS **********");
+          return;
+        })
+        .catch(error => {
+          if (error.response.status === 429) {
+            console.log(
+              "*********** WAITING 5 MINS BECAUSE OF INSTAGRAM RATE LIMITING ********"
+            );
+            setTimeout(() => {
+              console.log("*********** LETS TRY AGAIN ***********");
+              getFollowers();
+            }, 1000 * 60 * 5);
+          }
+        });
     }
+  };
+
+  try {
+    console.log(
+      `************************** STARTING SCRAPE JOB FOR ${
+        user.account_username
+      } ***********************************`
+    );
+    getFollowers();
+
+    res.json({ message: "Scraping has started bro" });
+  } catch ({ message }) {
+    res.status(500).json({ message });
   }
 
-  getFollowers();
+  // let followers = [];
+  // let end_cursor;
+  //
+  // async function instagram() {
+  //   const queryInstagram = await axios.get(
+  //     end_cursor
+  //       ? `https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50, "after": "${end_cursor}"}`
+  //       : `https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables={"id":"${instagram_id}","first":50}`,
+  //     {
+  //       headers: {
+  //         Cookie: cookieString
+  //       }
+  //     }
+  //   );
+  //
+  //   return queryInstagram;
+  // }
+  //
+  // const instagramData = await instagram();
+  //
+  // if (instagramData.data.data.user.edge_followed_by.page_info.has_next_page) {
+  //   await instagramData.data.data.user.edge_followed_by.edges.map(async f => {
+  //     await followers.push({
+  //       instagram_id: f.node.id,
+  //       username: f.node.username,
+  //       full_name: f.node.full_name,
+  //       profile_pic_url: f.node.profile_pic_url,
+  //       is_private: f.node.is_private,
+  //       is_verified: f.node.is_verified,
+  //       account_id: user.id
+  //     });
+  //   });
+  //
+  //   const follower = await models.add("followers", followers);
+  //   end_cursor =
+  //     instagramData.data.data.user.edge_followed_by.page_info.end_cursor;
+  //
+  //   return instagramData;
+  // } else {
+  //   await instagramData.data.data.user.edge_followed_by.edges.map(async f => {
+  //     await followers.push({
+  //       instagram_id: f.node.id,
+  //       username: f.node.username,
+  //       full_name: f.node.full_name,
+  //       profile_pic_url: f.node.profile_pic_url,
+  //       is_private: f.node.is_private,
+  //       is_verified: f.node.is_verified,
+  //       account_id: user.id
+  //     });
+  //   });
+  //
+  //   const follower = await models.add("followers", followers);
+  // }
+  //
+  // const followersList = await models.findAllBy("followers", {
+  //   account_id: user.id
+  // });
+  // res.json(followersList);
 });
 
 module.exports = route;
