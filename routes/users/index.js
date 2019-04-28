@@ -194,7 +194,7 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
         .then(async result => {
           if (result.data.status === "fail") {
             console.log(
-              "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
             );
             if (currentCookie === cookieSet.length - 1) {
               currentCookie = 0;
@@ -231,7 +231,7 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
         .catch(error => {
           if (error.response.status === 429) {
             console.log(
-              "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
             );
             if (currentCookie === cookieSet.length - 1) {
               currentCookie = 0;
@@ -262,7 +262,7 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
         .then(async result => {
           if (result.data.status === "fail") {
             console.log(
-              "********** INSTAGRAM IS RATE LIMITING US, LET'S WAIT 5 MINS *********"
+              "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
             );
 
             if (currentCookie === cookieSet.length - 1) {
