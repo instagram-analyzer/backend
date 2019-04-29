@@ -707,9 +707,11 @@ route.get("/account/stats/:account_username", async (req, res) => {
   const { account_username } = req.params;
 
   try {
-    const accountStats = await models.findAllBy("accounts", {
-      account_username
-    });
+    const accountStats = await models
+      .findAllBy("accounts", {
+        account_username
+      })
+      .orderBy("id", "asc");
     res.json(accountStats);
   } catch ({ message }) {
     res.status(500).json({ message });
