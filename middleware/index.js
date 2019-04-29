@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const users = require("../routes/users");
 const instagram = require("../routes/instagram");
+const auth = require("../routes/auth");
 const rateLimit = require("express-rate-limit");
 
 const configureMiddleware = server => {
@@ -19,7 +20,8 @@ const configureMiddleware = server => {
   server.use(helmet());
   server.use(morgan("dev"));
   server.use(cors());
-  server.use("/api/users", users);
+  // server.use("/api/users", users);
+  server.use("/api/auth", auth);
   // server.use("/api/instagram", instagram);
 };
 
