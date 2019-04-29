@@ -711,7 +711,8 @@ route.get("/account/stats/:account_username", async (req, res) => {
       .findAllBy("accounts", {
         account_username
       })
-      .orderBy("id", "asc");
+      .orderBy("id", "asc")
+      .limit(20);
     res.json(accountStats);
   } catch ({ message }) {
     res.status(500).json({ message });
