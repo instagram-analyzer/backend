@@ -703,4 +703,14 @@ route.get("/followers/:instagram_id", async (req, res, next) => {
   // res.json(followersList);
 });
 
+route.get("/account/stats/:instagram_id", async (req, res) => {
+  const { instagram_id } = req.params;
+
+  try {
+    const accountStats = await models.findAllBy("accounts", { instagram_id });
+    res.json(accountStats);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
 module.exports = route;
