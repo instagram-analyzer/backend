@@ -712,7 +712,7 @@ route.get("/account/stats/:account_username", async (req, res) => {
         account_username
       })
       .orderBy("id", "asc")
-      .limit(20);
+      .limit(10);
     res.json(accountStats);
   } catch ({ message }) {
     res.status(500).json({ message });
