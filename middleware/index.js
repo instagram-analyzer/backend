@@ -22,7 +22,7 @@ const configureMiddleware = server => {
   server.use(cors());
   // server.use("/api/users", users);
   server.use("/api/auth", auth);
-  // server.use("/api/instagram", instagram);
+  server.use("/api/instagram", instagram);
 };
 
 module.exports = {
