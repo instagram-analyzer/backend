@@ -1,8 +1,36 @@
 const route = require("express").Router();
+const { authenticate } = require("../../common/authentication.js");
 const models = require("../../common/helpers");
-const cookieString = require("../../common/getCookies.js");
+const { cookieString } = require("../../common/getCookies.js");
 const startProfileUpdateCron = require("../../common/updateProfileCron.js");
+const getFollowers = require("../../common/followers.js");
+const getPosts = require("../../common/posts.js");
 const axios = require("axios");
+
+route.get("/profile/hourly/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const hourlyData = await models.findAllBy("updating_accounts", {
+      account_username: username
+    });
+    res.json(hourlyData);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+route.get("/profile/analyze/:account_id", authenticate, async (req, res) => {
+  const { account_id } = req.params;
+
+  try {
+    getFollowers(account_id);
+    getPosts(account_id);
+    res.json({ message: "Deep analysis has started" });
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
 
 route.get("/profile/:username", async (req, res) => {
   const { username } = req.params;

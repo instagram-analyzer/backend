@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cron = require("node-cron");
 const models = require("./helpers.js");
-const cookieString = require("./getCookies.js");
+const { cookieString } = require("./getCookies.js");
 
 function fetchUser(username) {
   let newAccount;
