@@ -7,7 +7,7 @@ const getFollowers = require("../../common/followers.js");
 const getPosts = require("../../common/posts.js");
 const axios = require("axios");
 
-route.get("/profile/hourly/:username", async (req, res) => {
+route.get("/profile/hourly/:username", authenticate, async (req, res) => {
   const { username } = req.params;
 
   try {
@@ -32,7 +32,7 @@ route.get("/profile/analyze/:account_id", authenticate, async (req, res) => {
   }
 });
 
-route.get("/profile/:username", async (req, res) => {
+route.get("/profile/:username", authenticate, async (req, res) => {
   const { username } = req.params;
 
   try {
