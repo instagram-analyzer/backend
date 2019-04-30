@@ -67,14 +67,14 @@ route.get("/profile/:username", async (req, res) => {
         })
         .reduce((a, b) => a + b);
 
-      // let totalViews = await posts
-      //   .filter(p => p.node.is_video)
-      //   .map(p => {
-      //     return p.node.video_view_count;
-      //   })
-      //   .reduce((a, b) => a + b);
+      let totalViews = await posts
+        .filter(p => p.node.is_video)
+        .map(p => {
+          return p.node.video_view_count;
+        })
+        .reduce((a, b) => a + b);
 
-      // let videoCount = await posts.filter(p => p.node.is_video).length;
+      let videoCount = await posts.filter(p => p.node.is_video).length;
 
       totalEngagment =
         Math.round(
@@ -84,7 +84,7 @@ route.get("/profile/:username", async (req, res) => {
         ) / 100;
       aveLikes = totalLikes / postsLength;
       aveComments = totalComments / postsLength;
-      // aveViews = totalViews / videoCount;
+      aveViews = totalViews / videoCount;
     }
 
     const account = await models.findBy("accounts", {
@@ -111,7 +111,7 @@ route.get("/profile/:username", async (req, res) => {
         is_joined_recently: getProfile.data.graphql.user.is_joined_recently,
         average_likes: postsLength ? Math.round(aveLikes * 100) / 100 : 0,
         average_comments: postsLength ? Math.round(aveComments * 100) / 100 : 0,
-        // average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
+        average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
         total_engagement: postsLength ? totalEngagment : 0,
         posts_count:
           getProfile.data.graphql.user.edge_owner_to_timeline_media.count
