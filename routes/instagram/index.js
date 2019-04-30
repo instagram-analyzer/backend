@@ -1,10 +1,8 @@
 const route = require("express").Router();
 const models = require("../../common/helpers");
 const cookieString = require("../../common/getCookies.js");
-
+const startProfileUpdateCron = require("../../common/updateProfileCron.js");
 const axios = require("axios");
-
-let startCron = true;
 
 route.get("/profile/:username", async (req, res) => {
   const { username } = req.params;
@@ -134,6 +132,7 @@ route.get("/profile/:username", async (req, res) => {
       startCron = false;
       res.json(newAccount);
     } else {
+      startProfileUpdateCron(username);
       const [addAccount] = await models
         .add("accounts", {
           instagram_id: getProfile.data.graphql.user.id,
@@ -195,8 +194,6 @@ route.get("/profile/:username", async (req, res) => {
       });
 
       newAccount.posts = account_posts;
-      // startCron && startCronJob(username);
-      startCron = false;
       res.json(newAccount);
     }
   } catch ({ message }) {
