@@ -32,7 +32,7 @@ route.get("/profile/analyze/:account_id", authenticate, async (req, res) => {
   }
 });
 
-route.get("/profile/:username", authenticate, async (req, res) => {
+route.get("/profile/:username", async (req, res) => {
   const { username } = req.params;
 
   try {
@@ -122,34 +122,63 @@ route.get("/profile/:username", authenticate, async (req, res) => {
         account_id: account.id
       });
 
-      await localPosts.map(async (post, i) => {
-        const updatePosts = await models.update(
-          "account_posts",
-          localPosts[i].id,
-          {
-            caption: posts[i].node.edge_media_to_caption.edges.length
-              ? posts[i].node.edge_media_to_caption.edges[0].node.text
+      if (!localPosts.length) {
+        await posts.map(async post => {
+          const addPosts = await models.add("account_posts", {
+            caption: post.node.edge_media_to_caption.edges.length
+              ? post.node.edge_media_to_caption.edges[0].node.text
               : "",
-            shortcode: posts[i].node.shortcode,
-            comments_count: posts[i].node.edge_media_to_comment.count,
-            likes_count: posts[i].node.edge_liked_by.count,
-            view_count: posts[i].node.edge_media_preview_like.count,
-            comments_disabled: posts[i].node.comments_disabled,
-            taken_at_timestamp: posts[i].node.taken_at_timestamp,
-            is_video: posts[i].node.is_video,
-            accessibility_caption: posts[i].node.accessibility_caption,
-            account_id: 1,
+            display_url: post.node.display_url,
+            shortcode: post.node.shortcode,
+            comments_count: post.node.edge_media_to_comment.count,
+            likes_count: post.node.edge_liked_by.count,
+            view_count: post.node.edge_media_preview_like.count,
+            comments_disabled: post.node.comments_disabled,
+            taken_at_timestamp: post.node.taken_at_timestamp,
+            is_video: post.node.is_video,
+            accessibility_caption: post.node.accessibility_caption,
+            account_id: account.id,
             engagment:
               Math.round(
-                ((posts[i].node.edge_liked_by.count +
-                  posts[i].node.edge_media_to_comment.count) /
-                  account.follower_count) *
+                ((post.node.edge_liked_by.count +
+                  post.node.edge_media_to_comment.count) /
+                  newAccount.follower_count) *
                   100 *
                   100
               ) / 100
-          }
-        );
-      });
+          });
+        });
+      } else {
+        await localPosts.map(async (post, i) => {
+          const updatePosts = await models.update(
+            "account_posts",
+            localPosts[i].id,
+            {
+              caption: posts[i].node.edge_media_to_caption.edges.length
+                ? posts[i].node.edge_media_to_caption.edges[0].node.text
+                : "",
+              display_url: posts[i].node.display_url,
+              shortcode: posts[i].node.shortcode,
+              comments_count: posts[i].node.edge_media_to_comment.count,
+              likes_count: posts[i].node.edge_liked_by.count,
+              view_count: posts[i].node.edge_media_preview_like.count,
+              comments_disabled: posts[i].node.comments_disabled,
+              taken_at_timestamp: posts[i].node.taken_at_timestamp,
+              is_video: posts[i].node.is_video,
+              accessibility_caption: posts[i].node.accessibility_caption,
+              account_id: account.id,
+              engagment:
+                Math.round(
+                  ((posts[i].node.edge_liked_by.count +
+                    posts[i].node.edge_media_to_comment.count) /
+                    account.follower_count) *
+                    100 *
+                    100
+                ) / 100
+            }
+          );
+        });
+      }
 
       const account_posts = await models.findAllBy("account_posts", {
         account_id: account.id
@@ -197,6 +226,7 @@ route.get("/profile/:username", authenticate, async (req, res) => {
           caption: post.node.edge_media_to_caption.edges.length
             ? post.node.edge_media_to_caption.edges[0].node.text
             : "",
+          display_url: post.node.display_url,
           shortcode: post.node.shortcode,
           comments_count: post.node.edge_media_to_comment.count,
           likes_count: post.node.edge_liked_by.count,

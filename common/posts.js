@@ -17,7 +17,7 @@ const getPosts = async instagram_id => {
     axios
       .get(
         end_cursor
-          ? `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":12,"after":"${end_cursor}"}`
+          ? `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":50,"after":"${end_cursor}"}`
           : `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":50}`,
         {
           headers: {
@@ -98,7 +98,7 @@ const getPosts = async instagram_id => {
     axios
       .get(
         end_cursor
-          ? `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":12,"after":"${end_cursor}"}`
+          ? `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":50,"after":"${end_cursor}"}`
           : `${BASE_URL}query_hash=f2405b236d85e8296cf30347c9f08c2a&variables={"id":"${instagram_id}","first":50}`,
         {
           headers: {
@@ -161,6 +161,9 @@ const getPosts = async instagram_id => {
       })
       .then(() => {
         console.log("********** DONE GETTING ALL POSTS **********");
+        // AFTER DONE WITH POSTS, GET COMMENTS AND LIKES
+        // https://www.instagram.com/graphql/query/?query_id=17864450716183058
+
         return;
       })
       .catch(error => {
@@ -179,7 +182,5 @@ const getPosts = async instagram_id => {
       });
   }
 };
-
-// AFTER DONE WITH POSTS, GET COMMENTS AND LIKES
 
 module.exports = getPosts;
