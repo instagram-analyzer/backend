@@ -59,20 +59,20 @@ route.get("/profile/:username", async (req, res) => {
         .map(p => {
           return p.node.edge_liked_by.count;
         })
-        .reduce((a, b) => a + b);
+        .reduce((a, b) => a + b, 0);
 
       let totalComments = await posts
         .map(p => {
           return p.node.edge_media_to_comment.count;
         })
-        .reduce((a, b) => a + b);
+        .reduce((a, b) => a + b, 0);
 
       let totalViews = await posts
         .filter(p => p.node.is_video)
         .map(p => {
           return p.node.video_view_count;
         })
-        .reduce((a, b) => a + b);
+        .reduce((a, b) => a + b, 0);
 
       let videoCount = await posts.filter(p => p.node.is_video).length;
 
