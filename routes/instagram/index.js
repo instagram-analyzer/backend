@@ -132,7 +132,7 @@ route.get("/profile/:username", async (req, res) => {
             shortcode: post.node.shortcode,
             comments_count: post.node.edge_media_to_comment.count,
             likes_count: post.node.edge_liked_by.count,
-            view_count: post.node.edge_media_preview_like.count,
+            view_count: post.node.is_video ? post.node.video_view_count : 0,
             comments_disabled: post.node.comments_disabled,
             taken_at_timestamp: post.node.taken_at_timestamp,
             is_video: post.node.is_video,
@@ -161,7 +161,9 @@ route.get("/profile/:username", async (req, res) => {
               shortcode: posts[i].node.shortcode,
               comments_count: posts[i].node.edge_media_to_comment.count,
               likes_count: posts[i].node.edge_liked_by.count,
-              view_count: posts[i].node.edge_media_preview_like.count,
+              view_count: posts[i].node.is_video
+                ? posts[i].node.video_view_count
+                : 0,
               comments_disabled: posts[i].node.comments_disabled,
               taken_at_timestamp: posts[i].node.taken_at_timestamp,
               is_video: posts[i].node.is_video,
@@ -230,7 +232,7 @@ route.get("/profile/:username", async (req, res) => {
           shortcode: post.node.shortcode,
           comments_count: post.node.edge_media_to_comment.count,
           likes_count: post.node.edge_liked_by.count,
-          view_count: post.node.edge_media_preview_like.count,
+          view_count: post.node.is_video ? post.node.video_view_count : 0,
           comments_disabled: post.node.comments_disabled,
           taken_at_timestamp: post.node.taken_at_timestamp,
           is_video: post.node.is_video,
