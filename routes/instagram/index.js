@@ -6,6 +6,7 @@ const startProfileUpdateCron = require("../../common/updateProfileCron.js");
 const getFollowers = require("../../common/followers.js");
 const getPosts = require("../../common/posts.js");
 const axios = require("axios");
+const trackPost = require("../../common/trackPost.js");
 
 route.get("/profile/hourly/:username", authenticate, async (req, res) => {
   const { username } = req.params;
@@ -261,4 +262,10 @@ route.get("/profile/:username", async (req, res) => {
   }
 });
 
+route.post("/posts/track", async (req, res) => {
+  const { shortcode } = req.body;
+
+  trackPost(shortcode);
+  res.json({ message: "it's working" });
+});
 module.exports = route;
