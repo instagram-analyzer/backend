@@ -167,7 +167,7 @@ route.get("/profile/:username", async (req, res) => {
                 ? posts[i].node.video_view_count
                 : 0,
               comments_disabled: posts[i].node.comments_disabled,
-              taken_at_timestamp: posts[i].node.taken_at_timestamp,
+              taken_at_timestamp: Number(posts[i].node.taken_at_timestamp),
               is_video: posts[i].node.is_video,
               accessibility_caption: posts[i].node.accessibility_caption,
               account_id: account.id,
@@ -188,7 +188,7 @@ route.get("/profile/:username", async (req, res) => {
         .findAllBy("account_posts", {
           account_id: account.id
         })
-        .orderBy("id", "desc");
+        .orderBy("taken_at_timestamp", "desc");
 
       newAccount.posts = account_posts;
       // startCron && startCronJob(username);
@@ -237,7 +237,7 @@ route.get("/profile/:username", async (req, res) => {
           likes_count: post.node.edge_liked_by.count,
           view_count: post.node.is_video ? post.node.video_view_count : 0,
           comments_disabled: post.node.comments_disabled,
-          taken_at_timestamp: post.node.taken_at_timestamp,
+          taken_at_timestamp: Number(post.node.taken_at_timestamp),
           is_video: post.node.is_video,
           accessibility_caption: post.node.accessibility_caption,
           account_id: addAccount,
@@ -256,8 +256,7 @@ route.get("/profile/:username", async (req, res) => {
         .findAllBy("account_posts", {
           account_id: addAccount
         })
-        .orderBy("id", "desc");
-      console.log(account_posts);
+        .orderBy("taken_at_timestamp", "desc");
       newAccount.posts = account_posts;
       res.json(newAccount);
     }
