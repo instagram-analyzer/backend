@@ -3,9 +3,8 @@ const cron = require("node-cron");
 const models = require("./helpers.js");
 const { cookieString, getCookie } = require("./getCookies.js");
 
-let started = false;
-
-const trackPost = async shortcode => {
+let post;
+const trackPost = async (shortcode, post_id) => {
   try {
     const getPostData = await axios.post(
       `https://www.instagram.com/p/${shortcode}/?__a=1`
@@ -23,27 +22,25 @@ const trackPost = async shortcode => {
 
     const likes_count =
       getPostData.data.graphql.shortcode_media.edge_media_preview_like.count;
-    const post = {
-      display_url,
-      is_video,
+    post = {
       view_count,
-      taken_at_timestamp,
       comments_count,
       likes_count,
-      shortcode
+      post_id
     };
 
-    !started && (await models.add("post_track", post));
-    started = true;
-    cron.schedule("0 */10 * * * *", async () => {
-      console.log(`Fetching post....`);
-      await models.add("post_track", post);
-    });
-
+    await models.add("post_track", post);
     console.log("New post data added");
   } catch ({ message }) {
     console.log({ message });
   }
 };
 
-module.exports = trackPost;
+const startCron = (shortcode, id) => {
+  cron.schedule("0 */1 * * * *", async () => {
+    console.log(`Fetching post....`);
+    trackPost(shortcode, id);
+  });
+};
+
+module.exports = { trackPost, startCron };

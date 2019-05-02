@@ -7,7 +7,7 @@ const startProfileUpdateCron = require("../../common/updateProfileCron.js");
 const getFollowers = require("../../common/followers.js");
 const getPosts = require("../../common/posts.js");
 const axios = require("axios");
-const trackPost = require("../../common/trackPost.js");
+const { trackPost, startCron } = require("../../common/trackPost.js");
 
 route.get("/profile/hourly/:username", authenticate, async (req, res) => {
   const { username } = req.params;
@@ -266,7 +266,33 @@ route.get("/profile/:username", async (req, res) => {
 route.post("/posts/track", async (req, res) => {
   const { shortcode } = req.body;
 
-  trackPost(shortcode);
+  const getPostData = await axios.post(
+    `https://www.instagram.com/p/${shortcode}/?__a=1`
+  );
+
+  const display_url = getPostData.data.graphql.shortcode_media.display_url;
+  const is_video = getPostData.data.graphql.shortcode_media.is_video;
+  const view_count = is_video
+    ? getPostData.data.graphql.shortcode_media.video_view_count
+    : 0;
+  const taken_at_timestamp =
+    getPostData.data.graphql.shortcode_media.taken_at_timestamp;
+  const comments_count =
+    getPostData.data.graphql.shortcode_media.edge_media_to_comment.count;
+
+  const likes_count =
+    getPostData.data.graphql.shortcode_media.edge_media_preview_like.count;
+  post = {
+    display_url,
+    is_video,
+    view_count,
+    comments_count,
+    likes_count,
+    shortcode
+  };
+
+  const [id] = await models.add("posts", post).returning("id");
+  startCron(shortcode, id);
   res.json({ message: "it's working" });
 });
 
