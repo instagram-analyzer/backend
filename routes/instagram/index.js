@@ -190,7 +190,6 @@ route.get("/profile/:username", async (req, res) => {
 
       newAccount.posts = account_posts;
       // startCron && startCronJob(username);
-      startCron = false;
       res.json(newAccount);
     } else {
       startProfileUpdateCron(username);
