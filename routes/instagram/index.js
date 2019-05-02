@@ -184,9 +184,11 @@ route.get("/profile/:username", async (req, res) => {
         });
       }
 
-      const account_posts = await models.findAllBy("account_posts", {
-        account_id: account.id
-      });
+      const account_posts = await models
+        .findAllBy("account_posts", {
+          account_id: account.id
+        })
+        .orderBy("id", "desc");
 
       newAccount.posts = account_posts;
       // startCron && startCronJob(username);
@@ -250,10 +252,12 @@ route.get("/profile/:username", async (req, res) => {
         });
       });
 
-      const account_posts = await models.findAllBy("account_posts", {
-        account_id: addAccount
-      });
-
+      const account_posts = await models
+        .findAllBy("account_posts", {
+          account_id: addAccount
+        })
+        .orderBy("id", "desc");
+      console.log(account_posts);
       newAccount.posts = account_posts;
       res.json(newAccount);
     }
