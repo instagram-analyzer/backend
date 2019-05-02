@@ -299,7 +299,7 @@ route.post("/posts/track", async (req, res) => {
 route.get("/posts/track/", async (req, res) => {
   try {
     const posts = await db.raw(
-      `SELECT * FROM posts as p INNER JOIN post_track as pt ON pt.post_id = p.id WHERE p.created_at >= NOW() - '1 day'::INTERVAL`
+      `SELECT  pt.*, p.display_url, p.shortcode  FROM posts as p INNER JOIN post_track as pt ON pt.post_id = p.id WHERE p.created_at >= NOW() - '1 day'::INTERVAL`
     );
 
     res.json(posts.rows);
@@ -313,7 +313,7 @@ route.get("/posts/track/:url", async (req, res) => {
 
   try {
     const posts = await db.raw(
-      `SELECT * FROM posts as p INNER JOIN post_track as pt ON pt.post_id = p.id WHERE p.created_at >= NOW() - '1 day'::INTERVAL AND p.shortcode = ${url} `
+      `SELECT * FROM posts as p INNER JOIN post_track as pt ON pt.post_id = p.id WHERE p.created_at >= NOW() - '1 day'::INTERVAL AND p.shortcode ='${url}' `
     );
 
     res.json(posts);
