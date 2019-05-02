@@ -316,7 +316,7 @@ route.get("/posts/track/:url", async (req, res) => {
       `SELECT * FROM posts as p INNER JOIN post_track as pt ON pt.post_id = p.id WHERE p.created_at >= NOW() - '1 day'::INTERVAL AND p.shortcode ='${url}' `
     );
 
-    res.json(posts);
+    res.json(posts.rows);
   } catch ({ message }) {
     res.status(500).json({ message });
   }
