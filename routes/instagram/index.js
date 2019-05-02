@@ -1,6 +1,7 @@
 const route = require("express").Router();
 const { authenticate } = require("../../common/authentication.js");
 const models = require("../../common/helpers");
+const db = require("../../data/dbConfig");
 const { cookieString } = require("../../common/getCookies.js");
 const startProfileUpdateCron = require("../../common/updateProfileCron.js");
 const getFollowers = require("../../common/followers.js");
@@ -267,5 +268,31 @@ route.post("/posts/track", async (req, res) => {
 
   trackPost(shortcode);
   res.json({ message: "it's working" });
+});
+
+route.get("/posts/track/", async (req, res) => {
+  try {
+    const posts = await db.raw(
+      "SELECT * FROM post_track WHERE post_track.created_at >= NOW() - '1 day'::INTERVAL"
+    );
+
+    res.json(posts.rows);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+route.get("/posts/track/:url", async (req, res) => {
+  const { url } = req.params;
+
+  try {
+    const posts = await db.raw(
+      `SELECT * FROM post_track WHERE post_track.created_at >= NOW() - '1 day'::INTERVAL AND  post_track.shortcode = ${url}`
+    );
+
+    res.json(posts.rows);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
 });
 module.exports = route;

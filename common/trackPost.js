@@ -3,6 +3,8 @@ const cron = require("node-cron");
 const models = require("./helpers.js");
 const { cookieString, getCookie } = require("./getCookies.js");
 
+let started = false;
+
 const trackPost = async shortcode => {
   try {
     const getPostData = await axios.post(
@@ -21,16 +23,18 @@ const trackPost = async shortcode => {
 
     const likes_count =
       getPostData.data.graphql.shortcode_media.edge_media_preview_like.count;
-
     const post = {
       display_url,
       is_video,
       view_count,
       taken_at_timestamp,
       comments_count,
-      likes_count
+      likes_count,
+      shortcode
     };
 
+    !started && (await models.add("post_track", post));
+    started = true;
     cron.schedule("0 */10 * * * *", async () => {
       console.log(`Fetching post....`);
       await models.add("post_track", post);
