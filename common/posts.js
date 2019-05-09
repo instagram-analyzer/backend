@@ -65,13 +65,13 @@ const getPosts = async instagram_id => {
                 view_count: p.node.is_video ? p.node.video_view_count : null,
                 comments_disabled: p.node.comments_disabled,
                 accessibility_caption: p.node.accessibility_caption,
-                engagment: Math.floor(
-                  ((p.node.edge_media_preview_like.count +
-                    (p.node.edge_media_to_comment.count / user.follower_count) *
-                      100) /
-                    100) *
-                    100
-                ),
+                engagment:
+                  Math.round(
+                    ((p.node.edge_media_preview_like.count +
+                      p.node.edge_media_to_comment.count) /
+                      user.follower_count) *
+                      100
+                  ) / 100,
                 account_id: Number(user.id)
               });
             }
@@ -146,13 +146,13 @@ const getPosts = async instagram_id => {
                 view_count: p.node.is_video ? p.node.video_view_count : null,
                 comments_disabled: p.node.comments_disabled,
                 accessibility_caption: p.node.accessibility_caption,
-                engagment: Math.floor(
-                  ((p.node.edge_media_preview_like.count +
-                    (p.node.edge_media_to_comment.count / user.follower_count) *
-                      100) /
-                    100) *
-                    100
-                ),
+                engagment:
+                  Math.round(
+                    ((p.node.edge_media_preview_like.count +
+                      p.node.edge_media_to_comment.count) /
+                      user.follower_count) *
+                      100
+                  ) / 100,
                 account_id: Number(user.id)
               });
             }
