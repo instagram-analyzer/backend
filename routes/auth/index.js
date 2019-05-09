@@ -16,13 +16,12 @@ route.post("/register", async (req, res) => {
 
     if (exists) {
       return res.status(200).json(exists);
-    }
-
-    const id = await models.add("users", req.body);
-
-    if (id) {
-      const user = await models.findBy("users", { id });
-      return res.status(200).json(user);
+    } else {
+      const [id] = await models.add("users", req.body).returning("id");
+      if (id) {
+        const user = await models.findBy("users", { id });
+        return res.status(200).json(user);
+      }
     }
   } catch ({ message }) {
     return res.status(500).json({ message });
