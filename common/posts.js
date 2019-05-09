@@ -66,11 +66,13 @@ const getPosts = async instagram_id => {
                 comments_disabled: p.node.comments_disabled,
                 accessibility_caption: p.node.accessibility_caption,
                 engagment:
-                  Math.round(
+                  (Math.round(
                     (p.node.edge_media_preview_like.count /
                       user.follower_count) *
                       100
-                  ) / 100,
+                  ) /
+                    100) *
+                  100,
 
                 account_id: Number(user.id)
               });
@@ -147,11 +149,13 @@ const getPosts = async instagram_id => {
                 comments_disabled: p.node.comments_disabled,
                 accessibility_caption: p.node.accessibility_caption,
                 engagment:
-                  Math.round(
+                  (Math.round(
                     (p.node.edge_media_preview_like.count /
                       user.follower_count) *
                       100
-                  ) / 100,
+                  ) /
+                    100) *
+                  100,
 
                 account_id: Number(user.id)
               });
