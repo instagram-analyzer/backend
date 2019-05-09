@@ -124,65 +124,65 @@ route.get("/profile/:username", async (req, res) => {
         account_id: account.id
       });
 
-      if (!localPosts.length) {
-        await posts.map(async post => {
-          const addPosts = await models.add("account_posts", {
-            caption: post.node.edge_media_to_caption.edges.length
-              ? post.node.edge_media_to_caption.edges[0].node.text
-              : "",
-            display_url: post.node.display_url,
-            shortcode: post.node.shortcode,
-            comments_count: post.node.edge_media_to_comment.count,
-            likes_count: post.node.edge_liked_by.count,
-            view_count: post.node.is_video ? post.node.video_view_count : 0,
-            comments_disabled: post.node.comments_disabled,
-            taken_at_timestamp: post.node.taken_at_timestamp,
-            is_video: post.node.is_video,
-            accessibility_caption: post.node.accessibility_caption,
-            account_id: account.id,
-            engagment:
-              Math.round(
-                ((post.node.edge_liked_by.count +
-                  post.node.edge_media_to_comment.count) /
-                  newAccount.follower_count) *
-                  100 *
-                  100
-              ) / 100
-          });
-        });
-      } else {
-        await localPosts.map(async (post, i) => {
-          const updatePosts = await models.update(
-            "account_posts",
-            localPosts[i].id,
-            {
-              caption: posts[i].node.edge_media_to_caption.edges.length
-                ? posts[i].node.edge_media_to_caption.edges[0].node.text
-                : "",
-              display_url: posts[i].node.display_url,
-              shortcode: posts[i].node.shortcode,
-              comments_count: posts[i].node.edge_media_to_comment.count,
-              likes_count: posts[i].node.edge_liked_by.count,
-              view_count: posts[i].node.is_video
-                ? posts[i].node.video_view_count
-                : 0,
-              comments_disabled: posts[i].node.comments_disabled,
-              taken_at_timestamp: Number(posts[i].node.taken_at_timestamp),
-              is_video: posts[i].node.is_video,
-              accessibility_caption: posts[i].node.accessibility_caption,
-              account_id: account.id,
-              engagment:
-                Math.round(
-                  ((posts[i].node.edge_liked_by.count +
-                    posts[i].node.edge_media_to_comment.count) /
-                    account.follower_count) *
-                    100 *
-                    100
-                ) / 100
-            }
-          );
-        });
-      }
+      // if (!localPosts.length) {
+      //   await posts.map(async post => {
+      //     const addPosts = await models.add("account_posts", {
+      //       caption: post.node.edge_media_to_caption.edges.length
+      //         ? post.node.edge_media_to_caption.edges[0].node.text
+      //         : "",
+      //       display_url: post.node.display_url,
+      //       shortcode: post.node.shortcode,
+      //       comments_count: post.node.edge_media_to_comment.count,
+      //       likes_count: post.node.edge_liked_by.count,
+      //       view_count: post.node.is_video ? post.node.video_view_count : 0,
+      //       comments_disabled: post.node.comments_disabled,
+      //       taken_at_timestamp: post.node.taken_at_timestamp,
+      //       is_video: post.node.is_video,
+      //       accessibility_caption: post.node.accessibility_caption,
+      //       account_id: account.id,
+      //       engagment:
+      //         Math.round(
+      //           ((post.node.edge_liked_by.count +
+      //             post.node.edge_media_to_comment.count) /
+      //             newAccount.follower_count) *
+      //             100 *
+      //             100
+      //         ) / 100
+      //     });
+      //   });
+      // } else {
+      //   await localPosts.map(async (post, i) => {
+      //     const updatePosts = await models.update(
+      //       "account_posts",
+      //       localPosts[i].id,
+      //       {
+      //         caption: posts[i].node.edge_media_to_caption.edges.length
+      //           ? posts[i].node.edge_media_to_caption.edges[0].node.text
+      //           : "",
+      //         display_url: posts[i].node.display_url,
+      //         shortcode: posts[i].node.shortcode,
+      //         comments_count: posts[i].node.edge_media_to_comment.count,
+      //         likes_count: posts[i].node.edge_liked_by.count,
+      //         view_count: posts[i].node.is_video
+      //           ? posts[i].node.video_view_count
+      //           : 0,
+      //         comments_disabled: posts[i].node.comments_disabled,
+      //         taken_at_timestamp: Number(posts[i].node.taken_at_timestamp),
+      //         is_video: posts[i].node.is_video,
+      //         accessibility_caption: posts[i].node.accessibility_caption,
+      //         account_id: account.id,
+      //         engagment:
+      //           Math.round(
+      //             ((posts[i].node.edge_liked_by.count +
+      //               posts[i].node.edge_media_to_comment.count) /
+      //               account.follower_count) *
+      //               100 *
+      //               100
+      //           ) / 100
+      //       }
+      //     );
+      //   });
+      // }
 
       const account_posts = await models
         .findAllBy("account_posts", {
@@ -225,32 +225,6 @@ route.get("/profile/:username", async (req, res) => {
         .returning("id");
 
       newAccount = await models.findBy("accounts", { id: addAccount });
-
-      await posts.map(async post => {
-        const addPosts = await models.add("account_posts", {
-          caption: post.node.edge_media_to_caption.edges.length
-            ? post.node.edge_media_to_caption.edges[0].node.text
-            : "",
-          display_url: post.node.display_url,
-          shortcode: post.node.shortcode,
-          comments_count: post.node.edge_media_to_comment.count,
-          likes_count: post.node.edge_liked_by.count,
-          view_count: post.node.is_video ? post.node.video_view_count : 0,
-          comments_disabled: post.node.comments_disabled,
-          taken_at_timestamp: Number(post.node.taken_at_timestamp),
-          is_video: post.node.is_video,
-          accessibility_caption: post.node.accessibility_caption,
-          account_id: addAccount,
-          engagment:
-            Math.round(
-              ((post.node.edge_liked_by.count +
-                post.node.edge_media_to_comment.count) /
-                newAccount.follower_count) *
-                100 *
-                100
-            ) / 100
-        });
-      });
 
       const account_posts = await models
         .findAllBy("account_posts", {
@@ -319,6 +293,32 @@ route.get("/posts/track/:url", async (req, res) => {
     );
 
     res.json(posts.rows);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+route.get("/allposts/:instagram_id", async (req, res) => {
+  const { instagram_id } = req.params;
+
+  try {
+    getPosts(instagram_id);
+    res.json({ message: "Fetching started", success: true });
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+route.get("/post/status/:instagram_id", async (req, res) => {
+  const { instagram_id } = req.params;
+  try {
+    const user = await models.findBy("accounts", { instagram_id });
+    const status = await models
+      .findAllBy("fetching", { account_id: user.id })
+      .orderBy("id", "desc")
+      .limit(1)
+      .first();
+    res.json(status);
   } catch ({ message }) {
     res.status(500).json({ message });
   }
