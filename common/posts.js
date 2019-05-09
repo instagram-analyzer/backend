@@ -67,11 +67,11 @@ const getPosts = async instagram_id => {
                 accessibility_caption: p.node.accessibility_caption,
                 engagment:
                   Math.round(
-                    ((p.node.edge_media_to_comment.count +
-                      p.node.edge_media_preview_like.count) /
+                    (p.node.edge_media_preview_like.count /
                       user.follower_count) *
                       100
                   ) / 100,
+
                 account_id: Number(user.id)
               });
             }
@@ -148,11 +148,11 @@ const getPosts = async instagram_id => {
                 accessibility_caption: p.node.accessibility_caption,
                 engagment:
                   Math.round(
-                    ((p.node.edge_media_to_comment.count +
-                      p.node.edge_media_preview_like.count) /
+                    (p.node.edge_media_preview_like.count /
                       user.follower_count) *
                       100
                   ) / 100,
+
                 account_id: Number(user.id)
               });
             }
