@@ -9,6 +9,7 @@ const getPosts = require("../../common/posts.js");
 const axios = require("axios");
 const { trackPost, startCron } = require("../../common/trackPost.js");
 const cron = require("node-cron");
+const saveProfile = require("../../common/saveProfile");
 
 route.get("/profile/hourly/:username", authenticate, async (req, res) => {
   const { username } = req.params;
@@ -55,6 +56,12 @@ route.get("/profile/:username", async (req, res) => {
           }
         }
       );
+
+      saveProfile(getProfile.data.graphql.user);
+
+      cron.schedule("0 0 0 * * *", () => {
+        saveProfile(getProfile.data.graphql.user);
+      });
 
       const posts =
         getProfile.data.graphql.user.edge_owner_to_timeline_media.edges;
@@ -135,8 +142,12 @@ route.get("/profile/:username", async (req, res) => {
             account_id: account.id
           })
           .orderBy("taken_at_timestamp", "desc");
-
+        const overTimeData = await models.findAllBy("updating_accounts", {
+          account_username: username
+        });
         newAccount.posts = account_posts;
+        newAccount.overTimeData = overTimeData;
+
         getPosts(getProfile.data.graphql.user.id);
         fetchUser(username);
         // cron.schedule("* */10 * * * *", () => {
@@ -183,13 +194,16 @@ route.get("/profile/:username", async (req, res) => {
           .returning("id");
 
         newAccount = await models.findBy("accounts", { id: addAccount });
-
+        const overTimeData = await models.findAllBy("updating_accounts", {
+          account_username: username
+        });
         const account_posts = await models
           .findAllBy("account_posts", {
             account_id: addAccount
           })
           .orderBy("taken_at_timestamp", "desc");
         newAccount.posts = account_posts;
+        newAccount.overTimeData = overTimeData;
         res.json(newAccount);
       }
     } catch ({ message }) {
