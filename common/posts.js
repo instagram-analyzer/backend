@@ -107,14 +107,11 @@ const getPosts = async instagram_id => {
       })
       .then(() => getPosts(instagram_id))
       .catch(error => {
-        console.log(error);
-        if (error.response.status === 429) {
-          console.log(
-            "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
-          );
-          getCookie();
-          getPosts(instagram_id);
-        }
+        console.log(
+          "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+        );
+        getCookie();
+        getPosts(instagram_id);
       });
   } else {
     console.log("********** THIS IS THE LAST PAGE OF POSTS *********");
@@ -218,15 +215,11 @@ const getPosts = async instagram_id => {
         return;
       })
       .catch(error => {
-        console.log(error);
-
-        if (error.response.status === 429) {
-          console.log(
-            "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
-          );
-          getCookie();
-          getPosts(instagram_id);
-        }
+        console.log(
+          "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+        );
+        getCookie();
+        getPosts(instagram_id);
       });
   }
 };
