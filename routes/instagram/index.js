@@ -2,33 +2,13 @@ const route = require("express").Router();
 const { authenticate } = require("../../common/authentication.js");
 const models = require("../../common/helpers");
 const db = require("../../data/dbConfig");
-// const { cookieString } = require("../../common/getCookies.js");
+const { cookieString, getCookie } = require("../../common/getCookies.js");
 const fetchUser = require("../../common/updateProfileCron.js");
 const getFollowers = require("../../common/followers.js");
 const getPosts = require("../../common/posts.js");
 const axios = require("axios");
 const { trackPost, startCron } = require("../../common/trackPost.js");
 const cron = require("node-cron");
-
-const { cookieSet } = require("../../common/cookie");
-
-let cookieString = "";
-let currentCookie = 0;
-
-const getCookie = () => {
-  cookieString = "";
-  let cookieNames = [];
-  //"cookie1=value; cookie2=value; cookie3=value;"
-  const cookies = cookieSet[currentCookie].map(cookie => {
-    cookieNames.push({ name: cookie.name, value: cookie.value });
-  });
-
-  cookieNames.map(cookie => {
-    cookieString += `${cookie.name}=${cookie.value}; `;
-  });
-};
-
-getCookie();
 
 route.get("/profile/hourly/:username", authenticate, async (req, res) => {
   const { username } = req.params;
@@ -213,13 +193,8 @@ route.get("/profile/:username", async (req, res) => {
         res.json(newAccount);
       }
     } catch ({ message }) {
-      if (currentCookie === cookieSet.length - 1) {
-        currentCookie = 0;
-        res.redirect(`api/instagram/profile/${username}`);
-      } else {
-        currentCookie += 1;
-        res.redirect(`api/instagram/profile/${username}`);
-      }
+      getCookie();
+      res.redirect(`/api/instagram/profile/${username}`);
     }
   }
 });
