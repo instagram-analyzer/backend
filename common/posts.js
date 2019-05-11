@@ -10,8 +10,6 @@ let next_page = true;
 const getPosts = async instagram_id => {
   const user = await models.findBy("accounts", { instagram_id });
 
-  await getCookie();
-
   if (next_page) {
     console.log("********** GETTING POSTS AND SETTING THE NEXT PAGE *********");
     axios
