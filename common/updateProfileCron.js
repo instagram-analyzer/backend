@@ -1,7 +1,26 @@
 const axios = require("axios");
 const cron = require("node-cron");
 const models = require("./helpers.js");
-const { cookieString } = require("./getCookies.js");
+// const { cookieString, getCookie, currentCookie } = require("./getCookies.js");
+const { cookieSet } = require("./cookie");
+
+let cookieString = "";
+let currentCookie = 0;
+
+const getCookie = () => {
+  cookieString = "";
+  let cookieNames = [];
+  //"cookie1=value; cookie2=value; cookie3=value;"
+  const cookies = cookieSet[currentCookie].map(cookie => {
+    cookieNames.push({ name: cookie.name, value: cookie.value });
+  });
+
+  cookieNames.map(cookie => {
+    cookieString += `${cookie.name}=${cookie.value}; `;
+  });
+};
+
+getCookie();
 
 function fetchUser(username) {
   let newAccount;
@@ -80,13 +99,27 @@ function fetchUser(username) {
             result.data.graphql.user.edge_owner_to_timeline_media.count
         })
         .returning("id");
+    })
+    .catch(error => {
+      if (error.response.status === 429) {
+        console.log(
+          "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+        );
+        if (currentCookie === cookieSet.length - 1) {
+          currentCookie = 0;
+          fetchUser(username);
+        } else {
+          currentCookie += 1;
+          fetchUser(username);
+        }
+      }
     });
 
   return newAccount;
 }
 
 const startProfileUpdateCron = username => {
-  cron.schedule("0 0 */1 * * *", () => {
+  cron.schedule("* */2 * * * *", () => {
     console.log(`Fetching user account for ${username}`);
     fetchUser(username);
   });

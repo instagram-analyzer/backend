@@ -18,4 +18,4 @@ const getCookie = () => {
 
 getCookie();
 
-module.exports = { cookieString, getCookie };
+module.exports = { cookieString, getCookie, currentCookie };

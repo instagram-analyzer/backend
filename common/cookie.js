@@ -186,12 +186,160 @@ const highlightreel12385 = [
   }
 ];
 
+const alexagolden = [
+  {
+    name: "csrftoken",
+    value: "vRNVHyMS5WqKOCGFWhwHLhRSIasZocKC"
+  },
+  {
+    name: "ds_user_id",
+    value: "13504588961"
+  },
+  {
+    name: "mid",
+    value: "XNcKCgAEAAHMIa4DeridFz33uQWm"
+  },
+  {
+    name: "rur",
+    value: "PRN"
+  },
+  {
+    name: "sessionid",
+    value: "13504588961%3Ak0VAdteBhV6KN4%3A4"
+  },
+  {
+    name: "urlgen",
+    value:
+      '"{\\"2606:a000:4103:2800:448c:9ec8:1e6c:932\\": 11426}:1hPW7m:HCw0twAHrRRJj_qmHU9wdE3z8LQ"'
+  }
+];
+
+const boycej99668 = [
+  {
+    name: "csrftoken",
+    value: "Fe1b6iZuInyEEpz6Af2YKai9l4CmSF6J"
+  },
+  {
+    name: "ds_user_id",
+    value: "13558633113"
+  },
+  {
+    name: "mid",
+    value: "XNcKCgALAAGjvY3-_N188V_Mq1xa"
+  },
+  {
+    name: "rur",
+    value: "PRN"
+  },
+  {
+    name: "sessionid",
+    value: "13558633113%3AbJ53TrrIOCLkZM%3A11"
+  },
+  {
+    name: "urlgen",
+    value: '"{\\"173.238.204.16\\": 7992}:1hPW78:cH5LkaNMKZPvqonJf6REV8LLLgw"'
+  },
+  {
+    name: "ig_sdc",
+    value: "13558633113"
+  }
+];
+
+const jaredmeyers40 = [
+  {
+    name: "csrftoken",
+    value: "264e2qWwaJwPzhpmqRo46nsDxt8Yyjt7"
+  },
+  {
+    name: "ds_user_id",
+    value: "13328175616"
+  },
+  {
+    name: "mid",
+    value: "XNcNLgAEAAHHq1B88bYd4yx4ar6v"
+  },
+  {
+    name: "rur",
+    value: "FTW"
+  },
+  {
+    name: "sessionid",
+    value: "13328175616%3ASugw0g0D0vitwd%3A23"
+  },
+  {
+    name: "urlgen",
+    value:
+      '"{\\"2606:a000:4103:2800:448c:9ec8:1e6c:932\\": 11426}:1hPWGr:NsEAJ8b4riAS0PKG23ni_t_L_qw"'
+  }
+];
+
+const hannahyagurl = [
+  {
+    name: "csrftoken",
+    value: "DnWwxkGocMBvUiMjPSwpo2YUXY54pIan"
+  },
+  {
+    name: "ds_user_id",
+    value: "13359598261"
+  },
+  {
+    name: "mid",
+    value: "XNcOYAAEAAET4cWY_5tUX98HNePt"
+  },
+  {
+    name: "rur",
+    value: "FTW"
+  },
+  {
+    name: "sessionid",
+    value: "13359598261%3ABPfsWijp3JZILE%3A18"
+  },
+  {
+    name: "urlgen",
+    value:
+      '"{\\"2606:a000:4103:2800:448c:9ec8:1e6c:932\\": 11426}:1hPWLh:Eutvpw0oGBY9kLii6suxpXRAGAQ"'
+  }
+];
+
+const adamchileh = [
+  {
+    name: "csrftoken",
+    value: "hhcpHjEOABoJ8jhsD0HCFfW3bds2GQjm"
+  },
+  {
+    name: "ds_user_id",
+    value: "13687520869"
+  },
+  {
+    name: "mid",
+    value: "XNcPhwAEAAG5Mm1gZBRa8z_Ybk3I"
+  },
+  {
+    name: "rur",
+    value: "FTW"
+  },
+  {
+    name: "sessionid",
+    value: "13687520869%3Aih9STWeabnYbQr%3A28"
+  },
+  {
+    name: "urlgen",
+    value:
+      '"{\\"2606:a000:4103:2800:448c:9ec8:1e6c:932\\": 11426}:1hPWR9:W7WYHQBflYqrYq43Hu3JKUyo5FE"'
+  }
+];
+
 const cookieSet = [
   highlightreel12385,
   boycej149,
   boycej99667,
   boycej151,
-  boycej152
+  boycej152,
+  alexagolden,
+  boycej99668,
+  jaredmeyers40,
+  hannahyagurl,
+  adamchileh
 ];
 
 module.exports = {

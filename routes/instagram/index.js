@@ -2,12 +2,33 @@ const route = require("express").Router();
 const { authenticate } = require("../../common/authentication.js");
 const models = require("../../common/helpers");
 const db = require("../../data/dbConfig");
-const { cookieString } = require("../../common/getCookies.js");
+// const { cookieString } = require("../../common/getCookies.js");
 const startProfileUpdateCron = require("../../common/updateProfileCron.js");
 const getFollowers = require("../../common/followers.js");
 const getPosts = require("../../common/posts.js");
 const axios = require("axios");
 const { trackPost, startCron } = require("../../common/trackPost.js");
+const cron = require("node-cron");
+
+const { cookieSet } = require("../../common/cookie");
+
+let cookieString = "";
+let currentCookie = 0;
+
+const getCookie = () => {
+  cookieString = "";
+  let cookieNames = [];
+  //"cookie1=value; cookie2=value; cookie3=value;"
+  const cookies = cookieSet[currentCookie].map(cookie => {
+    cookieNames.push({ name: cookie.name, value: cookie.value });
+  });
+
+  cookieNames.map(cookie => {
+    cookieString += `${cookie.name}=${cookie.value}; `;
+  });
+};
+
+getCookie();
 
 route.get("/profile/hourly/:username", authenticate, async (req, res) => {
   const { username } = req.params;
@@ -124,66 +145,6 @@ route.get("/profile/:username", async (req, res) => {
         account_id: account.id
       });
 
-      // if (!localPosts.length) {
-      //   await posts.map(async post => {
-      //     const addPosts = await models.add("account_posts", {
-      //       caption: post.node.edge_media_to_caption.edges.length
-      //         ? post.node.edge_media_to_caption.edges[0].node.text
-      //         : "",
-      //       display_url: post.node.display_url,
-      //       shortcode: post.node.shortcode,
-      //       comments_count: post.node.edge_media_to_comment.count,
-      //       likes_count: post.node.edge_liked_by.count,
-      //       view_count: post.node.is_video ? post.node.video_view_count : 0,
-      //       comments_disabled: post.node.comments_disabled,
-      //       taken_at_timestamp: post.node.taken_at_timestamp,
-      //       is_video: post.node.is_video,
-      //       accessibility_caption: post.node.accessibility_caption,
-      //       account_id: account.id,
-      //       engagment:
-      //         Math.round(
-      //           ((post.node.edge_liked_by.count +
-      //             post.node.edge_media_to_comment.count) /
-      //             newAccount.follower_count) *
-      //             100 *
-      //             100
-      //         ) / 100
-      //     });
-      //   });
-      // } else {
-      //   await localPosts.map(async (post, i) => {
-      //     const updatePosts = await models.update(
-      //       "account_posts",
-      //       localPosts[i].id,
-      //       {
-      //         caption: posts[i].node.edge_media_to_caption.edges.length
-      //           ? posts[i].node.edge_media_to_caption.edges[0].node.text
-      //           : "",
-      //         display_url: posts[i].node.display_url,
-      //         shortcode: posts[i].node.shortcode,
-      //         comments_count: posts[i].node.edge_media_to_comment.count,
-      //         likes_count: posts[i].node.edge_liked_by.count,
-      //         view_count: posts[i].node.is_video
-      //           ? posts[i].node.video_view_count
-      //           : 0,
-      //         comments_disabled: posts[i].node.comments_disabled,
-      //         taken_at_timestamp: Number(posts[i].node.taken_at_timestamp),
-      //         is_video: posts[i].node.is_video,
-      //         accessibility_caption: posts[i].node.accessibility_caption,
-      //         account_id: account.id,
-      //         engagment:
-      //           Math.round(
-      //             ((posts[i].node.edge_liked_by.count +
-      //               posts[i].node.edge_media_to_comment.count) /
-      //               account.follower_count) *
-      //               100 *
-      //               100
-      //           ) / 100
-      //       }
-      //     );
-      //   });
-      // }
-
       const account_posts = await models
         .findAllBy("account_posts", {
           account_id: account.id
@@ -191,10 +152,19 @@ route.get("/profile/:username", async (req, res) => {
         .orderBy("taken_at_timestamp", "desc");
 
       newAccount.posts = account_posts;
-      // startCron && startCronJob(username);
+      getPosts(getProfile.data.graphql.user.id);
+      startProfileUpdateCron(username);
+      cron.schedule("* */2 * * * *", () => {
+        getPosts(getProfile.data.graphql.user.id);
+      });
       res.json(newAccount);
     } else {
+      getPosts(getProfile.data.graphql.user.id);
       startProfileUpdateCron(username);
+      cron.schedule("* */2 * * * *", () => {
+        getPosts(getProfile.data.graphql.user.id);
+      });
+
       const [addAccount] = await models
         .add("accounts", {
           instagram_id: getProfile.data.graphql.user.id,
@@ -235,7 +205,13 @@ route.get("/profile/:username", async (req, res) => {
       res.json(newAccount);
     }
   } catch ({ message }) {
-    res.status(500).json({ message });
+    if (currentCookie === cookieSet.length - 1) {
+      currentCookie = 0;
+      res.redirect(`api/instagram/profile/${username}`);
+    } else {
+      currentCookie += 1;
+      res.redirect(`api/instagram/profile/${username}`);
+    }
   }
 });
 

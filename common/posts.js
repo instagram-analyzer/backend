@@ -1,8 +1,27 @@
 const axios = require("axios");
 const cron = require("node-cron");
 const models = require("./helpers.js");
-const { cookieString, getCookie } = require("./getCookies.js");
+// const { cookieString, getCookie, currentCookie } = require("./getCookies.js");
 const BASE_URL = "https://www.instagram.com/graphql/query/?";
+const { cookieSet } = require("./cookie");
+
+let cookieString = "";
+let currentCookie = 0;
+
+const getCookie = () => {
+  cookieString = "";
+  let cookieNames = [];
+  //"cookie1=value; cookie2=value; cookie3=value;"
+  const cookies = cookieSet[currentCookie].map(cookie => {
+    cookieNames.push({ name: cookie.name, value: cookie.value });
+  });
+
+  cookieNames.map(cookie => {
+    cookieString += `${cookie.name}=${cookie.value}; `;
+  });
+};
+
+getCookie();
 
 let end_cursor;
 let next_page = true;
