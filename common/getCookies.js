@@ -8,9 +8,9 @@ const getCookie = () => {
   cookieString = "";
   let cookieNames = [];
   //"cookie1=value; cookie2=value; cookie3=value;"
-  const cookies = cookieSet[
-    currentCookie === cookieSet.length - 1 ? 0 : currentCookie + 1
-  ].map(cookie => {
+  currentCookie =
+    currentCookie === cookieSet.length - 1 ? 0 : currentCookie + 1;
+  const cookies = cookieSet[currentCookie].map(cookie => {
     cookieNames.push({ name: cookie.name, value: cookie.value });
   });
 
