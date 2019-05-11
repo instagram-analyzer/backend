@@ -107,6 +107,7 @@ const getPosts = async instagram_id => {
       })
       .then(() => getPosts(instagram_id))
       .catch(error => {
+        console.log(error);
         if (error.response.status === 429) {
           console.log(
             "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
@@ -217,6 +218,8 @@ const getPosts = async instagram_id => {
         return;
       })
       .catch(error => {
+        console.log(error);
+
         if (error.response.status === 429) {
           console.log(
             "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
