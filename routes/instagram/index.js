@@ -139,18 +139,18 @@ route.get("/profile/:username", async (req, res) => {
         newAccount.posts = account_posts;
         getPosts(getProfile.data.graphql.user.id);
         fetchUser(username);
-        cron.schedule("* */10 * * * *", () => {
-          fetchUser(username);
-          getPosts(getProfile.data.graphql.user.id);
-        });
+        // cron.schedule("* */10 * * * *", () => {
+        //   fetchUser(username);
+        //   getPosts(getProfile.data.graphql.user.id);
+        // });
         res.json(newAccount);
       } else {
         getPosts(getProfile.data.graphql.user.id);
         fetchUser(username);
-        cron.schedule("* */10 * * * *", () => {
-          fetchUser(username);
-          getPosts(getProfile.data.graphql.user.id);
-        });
+        // cron.schedule("* */10 * * * *", () => {
+        //   fetchUser(username);
+        //   getPosts(getProfile.data.graphql.user.id);
+        // });
 
         const [addAccount] = await models
           .add("accounts", {

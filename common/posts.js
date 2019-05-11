@@ -3,6 +3,7 @@ const cron = require("node-cron");
 const models = require("./helpers.js");
 const { cookieString, getCookie, currentCookie } = require("./getCookies.js");
 const BASE_URL = "https://www.instagram.com/graphql/query/?";
+const { cookieSet } = require("./cookie");
 
 let end_cursor;
 let next_page = true;
