@@ -119,7 +119,7 @@ function fetchUser(username) {
 }
 
 const startProfileUpdateCron = username => {
-  cron.schedule("* */2 * * * *", () => {
+  cron.schedule("* */10 * * * *", () => {
     console.log(`Fetching user account for ${username}`);
     fetchUser(username);
   });

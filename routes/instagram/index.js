@@ -159,14 +159,14 @@ route.get("/profile/:username", async (req, res) => {
         newAccount.posts = account_posts;
         getPosts(getProfile.data.graphql.user.id);
         startProfileUpdateCron(username);
-        cron.schedule("* */2 * * * *", () => {
+        cron.schedule("* */10 * * * *", () => {
           getPosts(getProfile.data.graphql.user.id);
         });
         res.json(newAccount);
       } else {
         getPosts(getProfile.data.graphql.user.id);
         startProfileUpdateCron(username);
-        cron.schedule("* */2 * * * *", () => {
+        cron.schedule("* */10 * * * *", () => {
           getPosts(getProfile.data.graphql.user.id);
         });
 
