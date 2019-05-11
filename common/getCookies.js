@@ -4,6 +4,7 @@ let cookieString = "";
 let currentCookie = 0;
 
 const getCookie = () => {
+  console.log("COOKIE NUMBER", currentCookie);
   cookieString = "";
   let cookieNames = [];
   //"cookie1=value; cookie2=value; cookie3=value;"
