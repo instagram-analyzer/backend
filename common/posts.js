@@ -1,5 +1,4 @@
 const axios = require("axios");
-const cron = require("node-cron");
 const models = require("./helpers.js");
 const { cookieString, getCookie, currentCookie } = require("./getCookies.js");
 const BASE_URL = "https://www.instagram.com/graphql/query/?";
@@ -31,13 +30,8 @@ const getPosts = async instagram_id => {
           console.log(
             "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
           );
-          if (currentCookie === cookieSet.length - 1) {
-            currentCookie = 0;
-            getPosts(instagram_id);
-          } else {
-            currentCookie += 1;
-            getPosts(instagram_id);
-          }
+          getCookie();
+          getPosts(instagram_id);
         } else {
           next_page =
             result.data.data.user.edge_owner_to_timeline_media.page_info
@@ -119,13 +113,8 @@ const getPosts = async instagram_id => {
           console.log(
             "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
           );
-          if (currentCookie === cookieSet.length - 1) {
-            currentCookie = 0;
-            getPosts(instagram_id);
-          } else {
-            currentCookie += 1;
-            getPosts(instagram_id);
-          }
+          getCookie();
+          getPosts(instagram_id);
         }
       });
   } else {
@@ -146,13 +135,8 @@ const getPosts = async instagram_id => {
           console.log(
             "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
           );
-          if (currentCookie === cookieSet.length - 1) {
-            currentCookie = 0;
-            getPosts(instagram_id);
-          } else {
-            currentCookie += 1;
-            getPosts(instagram_id);
-          }
+          getCookie();
+          getPosts(instagram_id);
         } else {
           next_page =
             result.data.data.user.edge_owner_to_timeline_media.page_info
