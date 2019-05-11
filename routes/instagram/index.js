@@ -3,7 +3,7 @@ const { authenticate } = require("../../common/authentication.js");
 const models = require("../../common/helpers");
 const db = require("../../data/dbConfig");
 // const { cookieString } = require("../../common/getCookies.js");
-const startProfileUpdateCron = require("../../common/updateProfileCron.js");
+const fetchUser = require("../../common/updateProfileCron.js");
 const getFollowers = require("../../common/followers.js");
 const getPosts = require("../../common/posts.js");
 const axios = require("axios");
@@ -158,15 +158,17 @@ route.get("/profile/:username", async (req, res) => {
 
         newAccount.posts = account_posts;
         getPosts(getProfile.data.graphql.user.id);
-        startProfileUpdateCron(username);
+        fetchUser(username);
         cron.schedule("* */10 * * * *", () => {
+          fetchUser(username);
           getPosts(getProfile.data.graphql.user.id);
         });
         res.json(newAccount);
       } else {
         getPosts(getProfile.data.graphql.user.id);
-        startProfileUpdateCron(username);
+        fetchUser(username);
         cron.schedule("* */10 * * * *", () => {
+          fetchUser(username);
           getPosts(getProfile.data.graphql.user.id);
         });
 

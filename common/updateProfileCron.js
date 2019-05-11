@@ -118,11 +118,4 @@ function fetchUser(username) {
   return newAccount;
 }
 
-const startProfileUpdateCron = username => {
-  cron.schedule("* */10 * * * *", () => {
-    console.log(`Fetching user account for ${username}`);
-    fetchUser(username);
-  });
-};
-
-module.exports = startProfileUpdateCron;
+module.exports = fetchUser;
