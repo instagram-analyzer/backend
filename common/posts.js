@@ -48,9 +48,11 @@ const getPosts = async instagram_id => {
 
           await result.data.data.user.edge_owner_to_timeline_media.edges.map(
             async p => {
-              const exists = await models.findBy("account_posts", {shortcode: p.node.shortcode})
-              if(exists){
-                await models.update("account_posts", exists.id,  {
+              const exists = await models.findBy("account_posts", {
+                shortcode: p.node.shortcode
+              });
+              if (exists) {
+                await models.update("account_posts", exists.id, {
                   display_url: p.node.display_url,
                   is_video: p.node.is_video,
                   video_url: p.node.is_video ? p.node.video_url : null,
@@ -74,9 +76,9 @@ const getPosts = async instagram_id => {
                         100 *
                         100
                     ) / 100,
-  
+
                   account_id: Number(user.id)
-                })
+                });
               } else {
                 await models.add("account_posts", {
                   display_url: p.node.display_url,
@@ -102,9 +104,9 @@ const getPosts = async instagram_id => {
                         100 *
                         100
                     ) / 100,
-  
+
                   account_id: Number(user.id)
-                })
+                });
               }
             }
           );
@@ -159,75 +161,76 @@ const getPosts = async instagram_id => {
             result.data.data.user.edge_owner_to_timeline_media.page_info
               .end_cursor;
 
-              await result.data.data.user.edge_owner_to_timeline_media.edges.map(
-                async p => {
-                  const exists = await models.findBy("account_posts", {shortcode: p.node.shortcode})
-                  if(exists){
-                    await models.update("account_posts", exists.id,  {
-                      display_url: p.node.display_url,
-                      is_video: p.node.is_video,
-                      video_url: p.node.is_video ? p.node.video_url : null,
-                      video_view_count: p.node.is_video
-                        ? p.node.video_view_count
-                        : null,
-                      caption: p.node.edge_media_to_caption.edges.length
-                        ? p.node.edge_media_to_caption.edges[0].node.text
-                        : null,
-                      shortcode: p.node.shortcode,
-                      taken_at_timestamp: p.node.taken_at_timestamp,
-                      comments_count: p.node.edge_media_to_comment.count,
-                      likes_count: p.node.edge_media_preview_like.count,
-                      view_count: p.node.is_video ? p.node.video_view_count : null,
-                      comments_disabled: p.node.comments_disabled,
-                      accessibility_caption: p.node.accessibility_caption,
-                      engagment:
-                        Math.round(
-                          (p.node.edge_media_preview_like.count /
-                            user.follower_count) *
-                            100 *
-                            100
-                        ) / 100,
-      
-                      account_id: Number(user.id)
-                    })
-                  } else {
-                    await models.add("account_posts", {
-                      display_url: p.node.display_url,
-                      is_video: p.node.is_video,
-                      video_url: p.node.is_video ? p.node.video_url : null,
-                      video_view_count: p.node.is_video
-                        ? p.node.video_view_count
-                        : null,
-                      caption: p.node.edge_media_to_caption.edges.length
-                        ? p.node.edge_media_to_caption.edges[0].node.text
-                        : null,
-                      shortcode: p.node.shortcode,
-                      taken_at_timestamp: p.node.taken_at_timestamp,
-                      comments_count: p.node.edge_media_to_comment.count,
-                      likes_count: p.node.edge_media_preview_like.count,
-                      view_count: p.node.is_video ? p.node.video_view_count : null,
-                      comments_disabled: p.node.comments_disabled,
-                      accessibility_caption: p.node.accessibility_caption,
-                      engagment:
-                        Math.round(
-                          (p.node.edge_media_preview_like.count /
-                            user.follower_count) *
-                            100 *
-                            100
-                        ) / 100,
-      
-                      account_id: Number(user.id)
-                    })
-                  }
-                }
-              );
+          await result.data.data.user.edge_owner_to_timeline_media.edges.map(
+            async p => {
+              const exists = await models.findBy("account_posts", {
+                shortcode: p.node.shortcode
+              });
+              if (exists) {
+                await models.update("account_posts", exists.id, {
+                  display_url: p.node.display_url,
+                  is_video: p.node.is_video,
+                  video_url: p.node.is_video ? p.node.video_url : null,
+                  video_view_count: p.node.is_video
+                    ? p.node.video_view_count
+                    : null,
+                  caption: p.node.edge_media_to_caption.edges.length
+                    ? p.node.edge_media_to_caption.edges[0].node.text
+                    : null,
+                  shortcode: p.node.shortcode,
+                  taken_at_timestamp: p.node.taken_at_timestamp,
+                  comments_count: p.node.edge_media_to_comment.count,
+                  likes_count: p.node.edge_media_preview_like.count,
+                  view_count: p.node.is_video ? p.node.video_view_count : null,
+                  comments_disabled: p.node.comments_disabled,
+                  accessibility_caption: p.node.accessibility_caption,
+                  engagment:
+                    Math.round(
+                      (p.node.edge_media_preview_like.count /
+                        user.follower_count) *
+                        100 *
+                        100
+                    ) / 100,
+
+                  account_id: Number(user.id)
+                });
+              } else {
+                await models.add("account_posts", {
+                  display_url: p.node.display_url,
+                  is_video: p.node.is_video,
+                  video_url: p.node.is_video ? p.node.video_url : null,
+                  video_view_count: p.node.is_video
+                    ? p.node.video_view_count
+                    : null,
+                  caption: p.node.edge_media_to_caption.edges.length
+                    ? p.node.edge_media_to_caption.edges[0].node.text
+                    : null,
+                  shortcode: p.node.shortcode,
+                  taken_at_timestamp: p.node.taken_at_timestamp,
+                  comments_count: p.node.edge_media_to_comment.count,
+                  likes_count: p.node.edge_media_preview_like.count,
+                  view_count: p.node.is_video ? p.node.video_view_count : null,
+                  comments_disabled: p.node.comments_disabled,
+                  accessibility_caption: p.node.accessibility_caption,
+                  engagment:
+                    Math.round(
+                      (p.node.edge_media_preview_like.count /
+                        user.follower_count) *
+                        100 *
+                        100
+                    ) / 100,
+
+                  account_id: Number(user.id)
+                });
+              }
+            }
+          );
         }
       })
       .then(() => {
         console.log("********** DONE GETTING ALL POSTS **********");
         // AFTER DONE WITH POSTS, GET COMMENTS AND LIKES
         // https://www.instagram.com/graphql/query/?query_id=17864450716183058
-
         return;
       })
       .catch(error => {
