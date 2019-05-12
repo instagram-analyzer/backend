@@ -142,9 +142,13 @@ route.get("/profile/:username", async (req, res) => {
             account_id: account.id
           })
           .orderBy("taken_at_timestamp", "desc");
-        const overTimeData = await models.findAllBy("updating_accounts", {
-          account_username: username
-        });
+
+        const overTimeData = await models
+          .findAllBy("updating_accounts", {
+            account_username: username
+          })
+          .orderBy("created_at", "desc");
+
         newAccount.posts = account_posts;
         newAccount.overTimeData = overTimeData;
 

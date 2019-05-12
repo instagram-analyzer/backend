@@ -20,6 +20,9 @@ exports.up = function(knex, Promise) {
     tbl.float("average_views");
     tbl.float("total_engagement");
     tbl.string("instagram_id");
+    tbl.integer("follower_growth");
+    tbl.integer("following_growth");
+    tbl.integer("posts_growth");
     tbl.timestamps(true, true);
   });
 };
