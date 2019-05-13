@@ -1,5 +1,6 @@
 const models = require("../common/helpers");
 const db = require("../data/dbConfig");
+const moment = require("moment");
 
 const saveProfile = async profile => {
   console.log(`saving ${profile.username}'s profile`);
@@ -8,16 +9,31 @@ const saveProfile = async profile => {
   //     .where("created_at", "now() - interval '1 year'")
   //     .orderBy("created_at", "desc");
 
+  // 2019-05-12T00:00:00Z  - 2019-05-12T11:59:00Z
+
   const savedProfile = await db.raw(
     `SELECT * FROM updating_accounts WHERE account_username = '${
       profile.username
-    }' AND created_at > now() - interval '1 year' ORDER BY created_at desc `
+    }' AND created_at >= '${moment().format(
+      "YYYY-MM-DD"
+    )}T00:00:00Z' AND created_at < '${moment().format(
+      "YYYY-MM-DD"
+    )}T23:59:00Z' ORDER BY created_at desc `
   );
 
   const yesterdayProfile = await db.raw(
     `SELECT * FROM updating_accounts WHERE account_username = '${
       profile.username
-    }' AND created_at > TIMESTAMP 'yesterday' AND created_at < TIMESTAMP 'today'  ORDER BY created_at desc `
+    }' AND created_at >= '${moment()
+      .subtract(1, "days")
+      .format("YYYY-MM-DD")}T00:00:00Z' AND created_at < '${moment()
+      .subtract(1, "days")
+      .format("YYYY-MM-DD")}T23:59:00Z' ORDER BY created_at desc `
+  );
+
+  console.log(
+    savedProfile.rows[0].follower_count -
+      yesterdayProfile.rows[0].follower_count
   );
 
   if (savedProfile.rows[0]) {
