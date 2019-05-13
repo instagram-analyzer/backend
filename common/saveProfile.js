@@ -31,11 +31,6 @@ const saveProfile = async profile => {
       .format("YYYY-MM-DD")}T23:59:00Z' ORDER BY created_at desc `
   );
 
-  console.log(
-    savedProfile.rows[0].follower_count -
-      yesterdayProfile.rows[0].follower_count
-  );
-
   if (savedProfile.rows[0]) {
     await models.update("updating_accounts", savedProfile.rows[0].id, {
       account_bio: profile.biography,
