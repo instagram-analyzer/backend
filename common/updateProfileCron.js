@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cron = require("node-cron");
 const models = require("./helpers.js");
-const { cookieString } = require("./getCookies.js");
+const { cookieString, getCookie, currentCookie } = require("./getCookies.js");
 
 function fetchUser(username) {
   let newAccount;
@@ -53,43 +53,45 @@ function fetchUser(username) {
         // aveViews = totalViews / videoCount;
       }
 
-      const [addAccount] = await models
-        .add("updating_accounts", {
-          instagram_id: result.data.graphql.user.id,
-          account_bio: result.data.graphql.user.biography,
-          account_bio_url: result.data.graphql.user.external_url,
-          account_username: result.data.graphql.user.username,
-          account_image_url: result.data.graphql.user.profile_pic_url_hd,
-          follower_count: result.data.graphql.user.edge_followed_by.count,
-          following_count: result.data.graphql.user.edge_follow.count,
-          hightlight_reel_count: result.data.graphql.user.highlight_reel_count,
-          full_name: result.data.graphql.user.full_name,
-          is_verified: result.data.graphql.user.is_verified,
-          is_business_account: result.data.graphql.user.is_business_account,
-          business_category_name:
-            result.data.graphql.user.business_category_name,
-          is_private: result.data.graphql.user.is_private,
-          is_joined_recently: result.data.graphql.user.is_joined_recently,
-          average_likes: postsLength ? Math.round(aveLikes * 100) / 100 : 0,
-          average_comments: postsLength
-            ? Math.round(aveComments * 100) / 100
-            : 0,
-          // average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
-          total_engagement: postsLength ? totalEngagment : 0,
-          posts_count:
-            result.data.graphql.user.edge_owner_to_timeline_media.count
-        })
-        .returning("id");
+      // const [addAccount] = await models
+      //   .add("updating_accounts", {
+      //     instagram_id: result.data.graphql.user.id,
+      //     account_bio: result.data.graphql.user.biography,
+      //     account_bio_url: result.data.graphql.user.external_url,
+      //     account_username: result.data.graphql.user.username,
+      //     account_image_url: result.data.graphql.user.profile_pic_url_hd,
+      //     follower_count: result.data.graphql.user.edge_followed_by.count,
+      //     following_count: result.data.graphql.user.edge_follow.count,
+      //     hightlight_reel_count: result.data.graphql.user.highlight_reel_count,
+      //     full_name: result.data.graphql.user.full_name,
+      //     is_verified: result.data.graphql.user.is_verified,
+      //     is_business_account: result.data.graphql.user.is_business_account,
+      //     business_category_name:
+      //       result.data.graphql.user.business_category_name,
+      //     is_private: result.data.graphql.user.is_private,
+      //     is_joined_recently: result.data.graphql.user.is_joined_recently,
+      //     average_likes: postsLength ? Math.round(aveLikes * 100) / 100 : 0,
+      //     average_comments: postsLength
+      //       ? Math.round(aveComments * 100) / 100
+      //       : 0,
+      //     // average_views: postsLength ? Math.round(aveViews * 100) / 100 : 0,
+      //     total_engagement: postsLength ? totalEngagment : 0,
+      //     posts_count:
+      //       result.data.graphql.user.edge_owner_to_timeline_media.count
+      //   })
+      //   .returning("id");
+    })
+    .catch(error => {
+      if (error.response.status === 429) {
+        console.log(
+          "********** WE'RE SWITCHING ACCOUNTS AND TRYING AGAIN *********"
+        );
+        getCookie();
+        fetchUser(username);
+      }
     });
 
   return newAccount;
 }
 
-const startProfileUpdateCron = username => {
-  cron.schedule("0 0 */1 * * *", () => {
-    console.log(`Fetching user account for ${username}`);
-    fetchUser(username);
-  });
-};
-
-module.exports = startProfileUpdateCron;
+module.exports = fetchUser;

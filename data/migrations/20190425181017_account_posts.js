@@ -1,5 +1,6 @@
 exports.up = function(knex, Promise) {
   return knex.schema.createTable("account_posts", tbl => {
+    tbl.unique(["shortcode", "account_id"]);
     tbl.increments();
     tbl.string("display_url");
     tbl.boolean("is_video");
