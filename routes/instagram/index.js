@@ -150,7 +150,7 @@ route.get("/profile/:username", async (req, res) => {
           .orderBy("created_at", "desc");
 
         newAccount.posts = account_posts;
-        newAccount.overTimeData = overTimeData;
+        newAccount.overTimeData = overTimeData.reverse();
 
         getPosts(getProfile.data.graphql.user.id);
         fetchUser(username);
@@ -207,7 +207,7 @@ route.get("/profile/:username", async (req, res) => {
           })
           .orderBy("taken_at_timestamp", "desc");
         newAccount.posts = account_posts;
-        newAccount.overTimeData = overTimeData;
+        newAccount.overTimeData = overTimeData.reverse();
         res.json(newAccount);
       }
     } catch ({ message }) {
