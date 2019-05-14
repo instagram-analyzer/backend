@@ -35,6 +35,7 @@ const saveProfile = async profile => {
       .format("YYYY-MM-DD")}T23:59:00Z' ORDER BY created_at desc `
   );
 
+  console.log(savedProfile.rows, yesterdayProfile.rows);
   if (savedProfile.rows[0]) {
     console.log("I AM UPDATING");
     await models.update("updating_accounts", savedProfile.rows[0].id, {
