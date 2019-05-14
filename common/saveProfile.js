@@ -11,10 +11,6 @@ const saveProfile = async profile => {
 
   // 2019-05-12T00:00:00Z  - 2019-05-12T11:59:00Z
 
-  const testing = await db("updating_accounts").where({
-    account_username: profile.username
-  });
-
   const savedProfile = await db.raw(
     `SELECT * FROM updating_accounts WHERE account_username = '${
       profile.username
@@ -36,7 +32,8 @@ const saveProfile = async profile => {
   );
 
   console.log(savedProfile.rows, yesterdayProfile.rows);
-  if (savedProfile.rows[0]) {
+
+  if (await savedProfile.rows[0]) {
     console.log("I AM UPDATING");
     await models.update("updating_accounts", savedProfile.rows[0].id, {
       account_bio: profile.biography,
