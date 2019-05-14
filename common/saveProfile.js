@@ -21,6 +21,8 @@ const saveProfile = async profile => {
     )}T23:59:00Z' ORDER BY created_at desc `
   );
 
+  // console.log(testing.rows);
+
   const yesterdayProfile = await db.raw(
     `SELECT * FROM updating_accounts WHERE account_username = '${
       profile.username

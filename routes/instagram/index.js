@@ -11,18 +11,18 @@ const { trackPost, startCron } = require("../../common/trackPost.js");
 const cron = require("node-cron");
 const saveProfile = require("../../common/saveProfile");
 
-route.get("/profile/hourly/:username", authenticate, async (req, res) => {
-  const { username } = req.params;
+// route.get("/profile/hourly/:username", authenticate, async (req, res) => {
+//   const { username } = req.params;
 
-  try {
-    const hourlyData = await models.findAllBy("updating_accounts", {
-      account_username: username
-    });
-    res.json(hourlyData);
-  } catch ({ message }) {
-    res.status(500).json({ message });
-  }
-});
+//   try {
+//     const hourlyData = await models.findAllBy("updating_accounts", {
+//       account_username: username
+//     });
+//     res.json(hourlyData);
+//   } catch ({ message }) {
+//     res.status(500).json({ message });
+//   }
+// });
 
 route.get("/profile/analyze/:account_id", authenticate, async (req, res) => {
   const { account_id } = req.params;
@@ -246,7 +246,7 @@ route.post("/posts/track", async (req, res) => {
   };
 
   const [id] = await models.add("posts", post).returning("id");
-  startCron(shortcode, id);
+  // startCron(shortcode, id);
   res.json({ message: "it's working" });
 });
 
