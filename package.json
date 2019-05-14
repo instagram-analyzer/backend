@@ -29,6 +29,7 @@
     "jwt-decode": "^2.2.0",
     "knex": "^0.16.5",
     "moment": "^2.24.0",
+    "moment-timezone": "^0.5.25",
     "morgan": "^1.9.1",
     "node-cron": "^2.0.3",
     "pg": "^7.10.0",

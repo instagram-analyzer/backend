@@ -1,6 +1,6 @@
 const models = require("../common/helpers");
 const db = require("../data/dbConfig");
-const moment = require("moment");
+const moment = require("moment-timezone").tz("Etc/GMT");
 
 const saveProfile = async profile => {
   console.log(`saving ${profile.username}'s profile`);
@@ -11,24 +11,26 @@ const saveProfile = async profile => {
 
   // 2019-05-12T00:00:00Z  - 2019-05-12T11:59:00Z
 
+  const testing = await db("updating_accounts").where({
+    account_username: profile.username
+  });
+
   const savedProfile = await db.raw(
     `SELECT * FROM updating_accounts WHERE account_username = '${
       profile.username
-    }' AND created_at >= '${moment().format(
+    }' AND created_at >= '${moment.format(
       "YYYY-MM-DD"
-    )}T00:00:00Z' AND created_at < '${moment().format(
+    )}T00:00:00Z' AND created_at < '${moment.format(
       "YYYY-MM-DD"
     )}T23:59:00Z' ORDER BY created_at desc `
   );
 
-  // console.log(testing.rows);
-
   const yesterdayProfile = await db.raw(
     `SELECT * FROM updating_accounts WHERE account_username = '${
       profile.username
-    }' AND created_at >= '${moment()
+    }' AND created_at >= '${moment
       .subtract(1, "days")
-      .format("YYYY-MM-DD")}T00:00:00Z' AND created_at < '${moment()
+      .format("YYYY-MM-DD")}T00:00:00Z' AND created_at < '${moment
       .subtract(1, "days")
       .format("YYYY-MM-DD")}T23:59:00Z' ORDER BY created_at desc `
   );
