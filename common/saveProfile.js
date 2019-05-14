@@ -36,6 +36,7 @@ const saveProfile = async profile => {
   );
 
   if (savedProfile.rows[0]) {
+    console.log("I AM UPDATING");
     await models.update("updating_accounts", savedProfile.rows[0].id, {
       account_bio: profile.biography,
       account_bio_url: profile.external_url,
@@ -58,6 +59,7 @@ const saveProfile = async profile => {
         : 0
     });
   } else {
+    console.log("I AM ADDING");
     await models.add("updating_accounts", {
       account_bio: profile.biography,
       account_bio_url: profile.external_url,
